@@ -4,9 +4,9 @@ module ZimbraInterceptingProxy
     
     attr_accessor :body, :headers, :parser
     
-    def initialize(headers, body, parser)
-      @body = body
-      @headers = headers
+    def initialize(connection, parser)
+      @body = connection.body
+      @headers = connection.headers
       @parser = parser
     end
     

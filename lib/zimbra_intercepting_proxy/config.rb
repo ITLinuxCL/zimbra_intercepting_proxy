@@ -46,5 +46,29 @@ module ZimbraInterceptingProxy
       @new_backend
     end
     
+    def self.bind_port=(bind_port)
+      @bind_port = bind_port
+    end
+    
+    def self.bind_port
+      @bind_port
+    end
+    
+    def self.bind_address=(bind_address)
+      @bind_address = bind_address
+    end
+    
+    def self.bind_address
+      @bind_address
+    end
+    
+    def self.debug=(debug)
+      @debug = debug
+    end
+    
+    def self.debug
+      @debug
+    end
+    
   end
 end

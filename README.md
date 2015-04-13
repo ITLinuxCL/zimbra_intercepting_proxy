@@ -2,6 +2,15 @@
 
 TODO: Write a gem description
 
+
+## TODO:
+
+1. Logger
+2. Iniciar con parametros
+3. Iniciar el segundo plano
+4. Paquetizar
+
+
 ## Installation
 
 Add this line to your application's Gemfile:

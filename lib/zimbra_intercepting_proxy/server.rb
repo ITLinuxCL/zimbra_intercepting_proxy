@@ -3,27 +3,25 @@ module ZimbraInterceptingProxy
   module Server
     require 'pp'
     
-    def run(host='0.0.0.0', port=9999)
-      
+    def run
+      debug = ZimbraInterceptingProxy::Debug
+      host = ZimbraInterceptingProxy::Config.bind_address
+      port = ZimbraInterceptingProxy::Config.bind_port
+
       Proxy.start(:host => host, :port => port) do |conn|
         
-        @buffer = ''
+        debug.logger "Starting server on #{host}:#{port}"
         
+        @backend = {host: ZimbraInterceptingProxy::Config.old_backend, port: 80}
+        connection = ZimbraInterceptingProxy::Connection.new
+
         @parser = Http::Parser.new
-        @headers = nil
-        @body = ""
-        @started = false
-        @done = false
-
-        @parser.on_message_begin = proc{ @started = true }
-        @parser.on_headers_complete = proc { |e| @headers = e }
-        @parser.on_body = proc { |chunk| @body << chunk }
+        @parser.on_message_begin = proc{ connection.started = true }
+        @parser.on_headers_complete = proc { |e| connection.headers = e }
+        @parser.on_body = proc { |chunk| connection.body << chunk }
         @parser.on_message_complete = proc do |p|
-
-          backend_host, backend_port = @headers['Host'].split(':')          
-          @backend = {host: backend_host, port: port}
-
-          request = ZimbraInterceptingProxy::Request.new(@headers, @body, @parser)
+          
+          request = ZimbraInterceptingProxy::Request.new(connection, @parser)
                   
           if request.auth_request? || request.route_request?
             user = User.new(request.user_token)
@@ -32,30 +30,32 @@ module ZimbraInterceptingProxy
           end
           
           conn.server @backend[:host], :host => @backend[:host], :port => @backend[:port]
-          conn.relay_to_servers @buffer
+          conn.relay_to_servers connection.buffer
           
-          @buffer.clear
+          connection.buffer.clear
           
         end
         
         conn.on_connect do |data,b|
-          #puts [:on_connect, data, b].inspect
+          debug.logger [:on_connect, data, b]
         end
 
         conn.on_data do |data|
-          @buffer << data
+          debug.logger [:on_data, data]
+          connection.buffer << data
           @parser << data
 
           data
         end
 
         conn.on_response do |backend, resp|
-          #puts [:on_response, backend, resp].inspect
-          resp
+          new_resp = resp.gsub(/Auth-Server: .*/, "Auth-Server: #{ZimbraInterceptingProxy::Config.new_backend}")
+          debug.logger [:on_response, backend, new_resp]
+          new_resp
         end
 
         conn.on_finish do |backend, name|
-          #puts [:on_finish, name].inspect
+          debug.logger [:on_finish, name].inspect
         end
         
       end
