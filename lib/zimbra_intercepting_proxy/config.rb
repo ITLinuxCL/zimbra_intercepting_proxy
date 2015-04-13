@@ -70,5 +70,13 @@ module ZimbraInterceptingProxy
       @debug
     end
     
+    def self.new_mbx_local_ip=(ip)
+      @new_mbx_local_ip = ip
+    end
+    
+    def self.new_mbx_local_ip
+      @new_mbx_local_ip
+    end
+    
   end
 end

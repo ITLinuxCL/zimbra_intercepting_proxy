@@ -7,6 +7,7 @@ module ZimbraInterceptingProxy
       debug = ZimbraInterceptingProxy::Debug
       host = ZimbraInterceptingProxy::Config.bind_address
       port = ZimbraInterceptingProxy::Config.bind_port
+      new_mbx_local_ip = ZimbraInterceptingProxy::Config.new_mbx_local_ip
 
       Proxy.start(:host => host, :port => port) do |conn|
         
@@ -49,7 +50,8 @@ module ZimbraInterceptingProxy
         end
 
         conn.on_response do |backend, resp|
-          new_resp = resp.gsub(/Auth-Server: .*/, "Auth-Server: #{ZimbraInterceptingProxy::Config.new_backend}")
+          regex = Regexp.new "Auth-Server: #{new_mbx_local_ip}"
+          new_resp = resp.gsub(regex, "Auth-Server: #{ZimbraInterceptingProxy::Config.new_backend}")
           debug.logger [:on_response, backend, new_resp]
           new_resp
         end
