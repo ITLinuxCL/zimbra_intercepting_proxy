@@ -70,12 +70,12 @@ module ZimbraInterceptingProxy
       @debug
     end
     
-    def self.new_mbx_local_ip=(ip)
-      @new_mbx_local_ip = ip
+    def self.new_mbx_local_ip_regex=(ip)
+      @new_mbx_local_ip_regex = ip
     end
     
-    def self.new_mbx_local_ip
-      @new_mbx_local_ip
+    def self.new_mbx_local_ip_regex
+      @new_mbx_local_ip_regex
     end
     
   end

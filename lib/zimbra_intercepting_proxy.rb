@@ -28,6 +28,7 @@ module ZimbraInterceptingProxy
     ZimbraInterceptingProxy::Config.bind_address = options[:bind_address] || "0.0.0.0"
     ZimbraInterceptingProxy::Config.bind_port = options[:bind_port]
     ZimbraInterceptingProxy::Config.debug = options[:debug]
+    ZimbraInterceptingProxy::Config.new_mbx_local_ip_regex = options[:new_mbx_local_ip_regex]
   end
   
 end

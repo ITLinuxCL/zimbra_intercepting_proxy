@@ -38,7 +38,7 @@ optparse = OptionParser.new do |opts|
   end
   
   opts.on("-nmbxipADDRESS", "--newmailboxlocalip=ADDRESS", "The internal IP Address of the new backend mailbox") do |o|
-    options[:new_mbx_local_ip] = o
+    options[:new_mbx_local_ip_regex] = o
   end
   
   opts.on("-v", "--verbose", "Save logs information to /var/log/zimbra_intercepting_proxy.log") do |o|
