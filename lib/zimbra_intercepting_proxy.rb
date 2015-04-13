@@ -20,8 +20,8 @@ module ZimbraInterceptingProxy
   ZimbraInterceptingProxy::Config.old_backend = "www.indmail.cl"
   ZimbraInterceptingProxy::Config.new_backend = "190.196.215.125"
   
-  def self.start
-    ZimbraInterceptingProxy::Server.run
+  def self.start(host, port)
+    ZimbraInterceptingProxy::Server.run(host, port)
   end
   
 end

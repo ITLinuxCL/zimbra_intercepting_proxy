@@ -3,6 +3,8 @@ module ZimbraInterceptingProxy
     attr_accessor :new_backend, :old_backend
     
     ROUTE_URL = "/service/extension/nginx-lookup"
+    ROUTE_REQUEST_PORT = 7072
+    AUTH_REQUEST_PORT = 80
     
     def self.domain=(domain)
       @domain = domain

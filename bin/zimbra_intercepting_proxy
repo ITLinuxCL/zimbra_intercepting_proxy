@@ -3,4 +3,5 @@
 require 'bundler/setup'
 require 'zimbra_intercepting_proxy'
 
+# host, port
 ZimbraInterceptingProxy.start

@@ -23,6 +23,11 @@ module ZimbraInterceptingProxy
       @parser.request_url == ZimbraInterceptingProxy::Config::ROUTE_URL
     end
     
+    def port
+      return ZimbraInterceptingProxy::Config::ROUTE_REQUEST_PORT if route_request?
+      return ZimbraInterceptingProxy::Config::AUTH_REQUEST_PORT if auth_request?
+    end
+    
     def user_token
       return auth_username if auth_request?
       return auth_zimbraId if route_request?
