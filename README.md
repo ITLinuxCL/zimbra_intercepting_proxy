@@ -135,6 +135,11 @@ You can get the `zimbraId` with:
 $ zmprov ga watson@example.com zimbraId
 ```
 
+## Thanks
+
+* To the Zimbra folks for a great product, and
+* [@igrigorik](http://twitter.com/igrigorik) for [em-proxy](https://github.com/igrigorik/em-proxy)
+
 ## Contributing
 
 1. Fork it ( https://github.com/pbruna/zimbra_intercepting_proxy/fork )
