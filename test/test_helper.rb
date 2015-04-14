@@ -1,4 +1,5 @@
 require "zimbra_intercepting_proxy"
+require 'ostruct'
 
 require 'minitest/autorun'
 require 'minitest/reporters' # requires the gem

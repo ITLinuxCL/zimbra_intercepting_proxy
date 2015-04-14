@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["pbruna@itlinux.cl"]
   spec.summary       = "A HTTP intercepting Proxy for the Zimbra Proxy"
   spec.description   = spec.summary
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/pbruna/zimbra_intercepting_proxy"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'uuid'
   spec.add_dependency 'http_parser.rb'
   spec.add_dependency 'addressable'
+  spec.add_dependency 'xml-simple'
 
 
   spec.add_development_dependency "bundler", "~> 1.6"

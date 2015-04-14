@@ -11,7 +11,7 @@ module ZimbraInterceptingProxy
 
       Proxy.start(:host => host, :port => port) do |conn|
         
-        debug.logger "Starting server on #{host}:#{port}"
+        debug.logger "Starting server on #{host}:#{port} - V. #{ZimbraInterceptingProxy::VERSION}"
         
         @backend = {host: ZimbraInterceptingProxy::Config.old_backend, port: 80}
         connection = ZimbraInterceptingProxy::Connection.new

@@ -1,7 +1,12 @@
 # ZimbraInterceptingProxy
 
-TODO: Write a gem description
+This software is used to Intercept and Transform the traffic to and from the Zimbra Mailboxes when using a Zimbra Proxy.
+If you don't know what Zimbra Proxy is, You can read about it here: [https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide](https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide)
 
+## What is good for?
+
+### Zimbra Migrations
+Suppose you 
 
 ## TODO:
 

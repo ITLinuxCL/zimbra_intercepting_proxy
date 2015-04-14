@@ -4,6 +4,7 @@ require 'em-proxy'
 require 'http/parser'
 require "addressable/uri"
 require 'logger'
+require 'xmlsimple'
 require "zimbra_intercepting_proxy/version"
 require "zimbra_intercepting_proxy/user"
 require "zimbra_intercepting_proxy/config"
