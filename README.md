@@ -10,6 +10,11 @@ TODO: Write a gem description
 3. Iniciar el segundo plano
 4. Paquetizar
 
+## Configuracion de Zimbra Proxy
+
+1. Editar Templates
+
+2. Cambiar zimbraMtaAuthHost: localhost
 
 ## Installation
 

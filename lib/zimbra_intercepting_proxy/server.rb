@@ -50,8 +50,10 @@ module ZimbraInterceptingProxy
         end
 
         conn.on_response do |backend, resp|
-          regex = Regexp.new "Auth-Server: #{new_mbx_local_ip_regex}*"
-          new_resp = resp.gsub(regex, "Auth-Server: #{ZimbraInterceptingProxy::Config.new_backend}")
+          if backend = ZimbraInterceptingProxy::Config.new_backend
+            regex = Regexp.new "Auth-Server: #{new_mbx_local_ip_regex}*"
+            new_resp = resp.gsub(regex, "Auth-Server: #{ZimbraInterceptingProxy::Config.new_backend}")
+          end
           debug.logger [:on_response, backend, new_resp]
           new_resp
         end
