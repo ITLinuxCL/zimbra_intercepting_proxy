@@ -30,8 +30,14 @@ module ZimbraInterceptingProxy
             @backend[:port] = request.port
           end
           
-          conn.server @backend[:host], :host => @backend[:host], :port => @backend[:port]
-          conn.relay_to_servers connection.buffer
+          begin
+            conn.server @backend[:host], :host => @backend[:host], :port => @backend[:port]
+            conn.relay_to_servers connection.buffer
+          rescue EventMachine::ConnectionError => e
+            conn.server @backend[:host], :host => ZimbraInterceptingProxy::Config.old_backend, :port => @backend[:port]
+            conn.relay_to_servers connection.buffer
+          end
+
           
           connection.buffer.clear
           
