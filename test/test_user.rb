@@ -52,4 +52,9 @@ class User < Minitest::Test
     assert(!u.migrated?, "Failure message.")
   end
   
+  def test_migrated_false_if_email_nil
+    u = ZimbraInterceptingProxy::User.new(nil)
+    assert(!u.migrated?, "Failure message.")
+  end
+  
 end

@@ -49,6 +49,7 @@ module ZimbraInterceptingProxy
     end
     
     def set_email user_identifier
+      return nil if user_identifier.nil?
       return user_identifier if user_identifier.match(/@/)
       return "#{user_identifier}@#{ZimbraInterceptingProxy::Config.domain}" unless UUID.validate user_identifier
       nil
