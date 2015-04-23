@@ -13,6 +13,7 @@ pkg
 rdoc
 spec/reports
 test/tmp
+test/fixtures/*.org
 test/version_tmp
 tmp
 *.bundle

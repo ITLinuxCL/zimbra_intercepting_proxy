@@ -57,4 +57,15 @@ class User < Minitest::Test
     assert(!u.migrated?, "Failure message.")
   end
   
+  
+  def test_return_old_db_if_yamler_db_is_false
+    backup_map_file # backup users.yml
+    yaml_1 = ZimbraInterceptingProxy::User.DB.inspect
+    add_error_line
+    yaml_2 = ZimbraInterceptingProxy::User.DB.inspect
+    restore_map_file
+    assert_equal(Digest::MD5.digest(yaml_1), Digest::MD5.digest(yaml_2))
+  end
+  
+    
 end

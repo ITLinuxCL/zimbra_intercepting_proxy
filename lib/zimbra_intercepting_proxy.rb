@@ -13,6 +13,7 @@ require "zimbra_intercepting_proxy/request"
 require "zimbra_intercepting_proxy/server"
 require "zimbra_intercepting_proxy/debug"
 require "zimbra_intercepting_proxy/connection"
+require "zimbra_intercepting_proxy/yamler"
 
 module ZimbraInterceptingProxy
   

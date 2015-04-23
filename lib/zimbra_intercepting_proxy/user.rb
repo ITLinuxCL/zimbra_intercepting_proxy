@@ -3,6 +3,8 @@ module ZimbraInterceptingProxy
   class User
     attr_accessor :email, :zimbraId
     
+    @@db = {}
+    
     # user_identifier can be an email address, zimbraId UUID or just the
     # local part of an email address, like user in user@example.com
     def initialize(user_identifier)
@@ -34,12 +36,16 @@ module ZimbraInterceptingProxy
       !zimbraId.nil?
     end
 
+    # Return the old DB if the YAML file has error
     def self.load_migrated_users
-      YAML.load_file ZimbraInterceptingProxy::Config.migrated_users_file
+      data = ZimbraInterceptingProxy::Yamler.db
+      return @@db unless data
+      @@db = data
     end
     
     def self.DB
       load_migrated_users
+      @@db
     end
     
     private

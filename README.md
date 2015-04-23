@@ -129,10 +129,19 @@ watson@example.com: "251b1902-2250-4477-bdd1-8a101f7e7e4e"
 sherlock@example.com: "7b562dd0-be97-0132-9a66-482a1423458f"
 ```
 
+Updating the file does **not require** a restart.
+
 You can get the `zimbraId` with:
 
 ```
 $ zmprov ga watson@example.com zimbraId
+```
+
+##### Error in Map File
+If you have an error in your file, `ZIP` will return the on memory Map, this way we can keep the service up. In this event you should see this on `STDOUT`:
+
+```shel
+ERROR Yaml File: (./test/fixtures/users.yml): could not find expected ':' while scanning a simple key at line 7
 ```
 
 ## Thanks
