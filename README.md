@@ -51,6 +51,17 @@ It's recommended to install it on the same Zimbra Proxy server. All you need to 
 $ gem install zimbra_intercepting_proxy
 ```
 
+### Zimbra Mailbox IP Whitelist
+
+Since version 8, Zimbra has a DDoS protection system that blocks IP's address with many failed login connections. It's adviced by the [Zimbra Docs](https://wiki.zimbra.com/wiki/DoSFilter) to Whitelist the IP's address that you trust.
+
+You have to do this on the `NEW_MAILBOX` to whitelist connections from the IP from where you are migrating
+
+```bash
+$ zmprov mcf +zimbraHttpThrottleSafeIPs NEW_MAILBOX_IP
+$ zmmailboxdctl restart
+```
+
 ### Zimbra Proxy Modification
 
 **Important Note**
