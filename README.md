@@ -155,6 +155,25 @@ If you have an error in your file, `ZIP` will return the on memory Map, this way
 ERROR Yaml File: (./test/fixtures/users.yml): could not find expected ':' while scanning a simple key at line 7
 ```
 
+## Init scripts
+
+In the `examples` directory you have the following files:
+
+* `zip_9072`, to start the server on port 9072
+* `zip_9080`, you know
+
+Copy both files to the `/etc/init.d/` directory and then enable the services like this:
+
+```bash
+$ chkconfig --add zip_9072
+$ chkconfig --add zip_9080
+```
+
+### Monit
+It may be posible that `ZIP` crash for some reason, it's a new software after all. To reduce the down time we recomend to use [Monit](http://mmonit.com/monit/) to monitor and restart the `ZIP` in case of trouble.
+
+Check the examples directory for config files.
+
 ## Thanks
 
 * To the Zimbra folks for a great product, and

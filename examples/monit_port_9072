@@ -1,0 +1,5 @@
+check process zip_9072 with pidfile /var/run/zip_9072.pid
+   start program = "/etc/init.d/zip_9072 start"
+   stop program = "/etc/init.d/zip_9072 stop"
+   if failed host 127.0.0.1 port 9072 then restart
+   alert email@example.com

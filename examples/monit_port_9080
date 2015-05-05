@@ -1,0 +1,5 @@
+check process zip_9080 with pidfile /var/run/zip_9080.pid
+   start program = "/etc/init.d/zip_9080 start"
+   stop program = "/etc/init.d/zip_9080 stop"
+   if failed host 127.0.0.1 port 9080 then restart
+   alert mail@example.com
