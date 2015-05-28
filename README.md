@@ -40,6 +40,7 @@ This has been tested with:
 
 * Zimbra >= 7
 * Ruby >= 2.0
+* Bundler >= 1.9
 * Zimbra Proxy
 
 **You need to have direct access to the `7072` port of both Mailboxes**.
@@ -48,6 +49,7 @@ This has been tested with:
 It's recommended to install it on the same Zimbra Proxy server. All you need to do is run:
 
 ```bash
+$ gem install bundler
 $ gem install zimbra_intercepting_proxy
 ```
 
