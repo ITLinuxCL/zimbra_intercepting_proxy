@@ -3,9 +3,11 @@ require 'ostruct'
 
 require 'minitest/autorun'
 require 'minitest/reporters' # requires the gem
+require 'webmock/minitest'
 
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new # spec-like progress
 
+ZimbraInterceptingProxy::Config.soap_admin_url = "https://mail.zboxapp.com:19071/service/admin/soap"
 ZimbraInterceptingProxy::Config.domain="example.com"
 ZimbraInterceptingProxy::Config.migrated_users_file="./test/fixtures/users.yml"
 ZimbraInterceptingProxy::Config.old_backend = "old-mailbox.example.com"

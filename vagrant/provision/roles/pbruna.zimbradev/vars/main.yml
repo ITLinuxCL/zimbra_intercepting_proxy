@@ -1,0 +1,41 @@
+---
+# vars file for cartertdte.mta
+zimbra_required_packages:
+  - nc
+  - sudo
+  - libidn
+  - gmp
+  - libaio
+  - libstdc++
+  - unzip
+  - perl
+  - perl-core
+  - sysstat
+  - sqlite
+  - libreoffice
+  - libreoffice-headless
+  - "@Development tools"
+  - ant
+  - maven
+
+zimbra_download_url: https://files.zimbra.com/downloads/8.6.0_GA/zcs-8.6.0_GA_1153.RHEL7_64.20141215151110.tgz
+zimbra_file: zcs-8.6.0_GA_1153.RHEL7_64.20141215151110
+zimbra_256sum_file: db1ccebdd03113acf864cb93d689c13ddcb84e14eb1f163d95e72e7f01c2b216
+zimbra_password: 12345678
+zimbra_default_domain: 'zboxapp.dev'
+
+zimbra_cos:
+  - 'unknow'
+  - 'basic'
+  - 'professional'
+  - 'premium'
+
+zimbra_domains:
+  - name: 'zboxapp.dev'
+    accounts:
+      - name: 'pbruna@zboxapp.dev'
+        password: 12345678
+        delegated_admin_account: 'TRUE'
+      - name: 'deugenin@zboxapp.dev'
+        password: 12345678
+        delegated_admin_account: 'TRUE'

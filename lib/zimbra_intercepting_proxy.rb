@@ -5,6 +5,8 @@ require 'http/parser'
 require "addressable/uri"
 require 'logger'
 require 'xmlsimple'
+require 'erb'
+require 'json'
 require "zimbra_intercepting_proxy/version"
 require "zimbra_intercepting_proxy/user"
 require "zimbra_intercepting_proxy/config"
@@ -14,14 +16,15 @@ require "zimbra_intercepting_proxy/server"
 require "zimbra_intercepting_proxy/debug"
 require "zimbra_intercepting_proxy/connection"
 require "zimbra_intercepting_proxy/yamler"
+require "zimbra_intercepting_proxy/zm_lookup"
 
 module ZimbraInterceptingProxy
-  
+
   def self.start(options)
     config!(options)
     ZimbraInterceptingProxy::Server.run
   end
-  
+
   def self.config!(options)
     ZimbraInterceptingProxy::Config.domain = options[:domain]
     ZimbraInterceptingProxy::Config.migrated_users_file = options[:migrated_users_file]
@@ -32,5 +35,5 @@ module ZimbraInterceptingProxy
     ZimbraInterceptingProxy::Config.debug = options[:debug]
     ZimbraInterceptingProxy::Config.new_mbx_local_ip_regex = options[:new_mbx_local_ip_regex]
   end
-  
+
 end
