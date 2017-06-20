@@ -44,7 +44,8 @@ module ZimbraInterceptingProxy
         account = {
           "name" => data["name"],
           "id" => data["id"],
-          "zimbraMailTransport" => data["a"].first["_content"]
+          "zimbraMailTransport" => data["a"].first["_content"],
+          "zimbraMailHost" => data["a"].first["_content"].split(/:/)[1]
         }
         pp account
       rescue RestClient::ExceptionWithResponse => e
