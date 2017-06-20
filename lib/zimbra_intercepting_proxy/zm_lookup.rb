@@ -40,7 +40,13 @@ module ZimbraInterceptingProxy
       begin
         response = RestClient.post(soap_admin_url, json_request)
         response_as_data = JSON.parse(response.body)
-        account = response_as_data["Body"]["GetAccountResponse"]["account"].first
+        data = response_as_data["Body"]["GetAccountResponse"]["account"].first
+        account = {
+          "name" => data["name"],
+          "id" => data["id"],
+          "zimbraMailTransport" => data["a"].first["_content"]
+        }
+        pp account
       rescue RestClient::ExceptionWithResponse => e
         response = e.response
         ZimbraInterceptingProxy::Debug.logger e.response.body

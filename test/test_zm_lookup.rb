@@ -82,6 +82,7 @@ class ZmLookup < Minitest::Test
     account_email = "user@example.com"
     account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
     account_transport = "lmtp:server-05.zboxapp.dev:7025"
+    account_mailhost = "server-05.zboxapp.dev"
     fixture_response = "
     {
       \"Header\":{
@@ -117,7 +118,13 @@ class ZmLookup < Minitest::Test
     request_data = { account: "user@example.com", auth_token: "token", attrs: ['zimbraMailTransport']}
 
     response = ZimbraInterceptingProxy::ZmLookup.get_zimbra_account(request_data)
-    assert_equal(account_transport, response["a"].first["_content"])
+    assert_equal(account_email, response["name"])
+    assert_equal(account_id, response["id"])
+    assert_equal(account_transport, response["zimbraMailTransport"])
+  end
+
+  def test_should_return_mailbox_name_from_transport
+
   end
 
   # def test_only_set_zimbraId_when_passed_a_zimbraId
