@@ -93,5 +93,13 @@ module ZimbraInterceptingProxy
     def self.zimbra_admin_authtoken
       @zimbra_admin_authtoken
     end
+
+    def self.mail_host_attribute=(mail_host)
+      @mail_host_attribute = mail_host
+    end
+
+    def self.mail_host_attribute
+      @mail_host_attribute
+    end
   end
 end

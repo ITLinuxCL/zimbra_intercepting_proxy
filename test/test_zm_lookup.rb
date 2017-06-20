@@ -48,6 +48,7 @@ class ZmLookup < Minitest::Test
   end
 
   def test_should_return_formated_json_get_account_request
+    mail_host_attribute = ZimbraInterceptingProxy::Config.mail_host_attribute
     account_email = "user@example.com"
     expected_json = "
      {
@@ -61,7 +62,7 @@ class ZmLookup < Minitest::Test
        },
        \"Body\": {
          \"GetAccountRequest\": {
-           \"attrs\": \"zimbraMailHost,zimbraMailTransport\",
+           \"attrs\": \"#{mail_host_attribute}\",
            \"account\":{
              \"by\": \"name\",
              \"_content\": \"#{account_email}\"
@@ -73,16 +74,16 @@ class ZmLookup < Minitest::Test
     "
 
     json_account = ZimbraInterceptingProxy::ZmLookup.build_json_get_account(
-      "user@example.com", @auth_token, ["zimbraMailHost", "zimbraMailTransport"]
+      "user@example.com", @auth_token, mail_host_attribute
     )
     assert_equal(JSON.parse(expected_json), JSON.parse(json_account))
   end
 
   def test_should_return_account_info
+    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailTransport'
     account_email = "user@example.com"
     account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
-    account_transport = "lmtp:server-05.zboxapp.dev:7025"
-    account_mailhost = "server-05.zboxapp.dev"
+    account_mailhost = "lmtp:server-05.zboxapp.dev:7025"
     fixture_response = "
     {
       \"Header\":{
@@ -99,7 +100,7 @@ class ZmLookup < Minitest::Test
               \"a\":[
                 {
                   \"n\":\"zimbraMailTransport\",
-                  \"_content\":\"#{account_transport}\"
+                  \"_content\":\"#{account_mailhost}\"
                 }
               ]
             }
@@ -115,12 +116,12 @@ class ZmLookup < Minitest::Test
       with(body: /GetAccountRequest/).
       to_return(body: fixture_response)
 
-    request_data = { account: "user@example.com", auth_token: "token", attrs: ['zimbraMailTransport']}
+    request_data = { account: "user@example.com", auth_token: "token"}
 
     response = ZimbraInterceptingProxy::ZmLookup.get_zimbra_account(request_data)
     assert_equal(account_email, response["name"])
     assert_equal(account_id, response["id"])
-    assert_equal(account_mailhost, response["zimbraMailHost"])
+    assert_equal(account_mailhost, response[ZimbraInterceptingProxy::Config.mail_host_attribute])
   end
 
   def test_should_return_mailbox_name_from_transport

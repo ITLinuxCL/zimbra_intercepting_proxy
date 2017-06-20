@@ -13,8 +13,7 @@ module ZimbraInterceptingProxy
       request.to_json
     end
 
-    def self.build_json_get_account(account_email, authToken, attrs = [])
-      attrs = attrs.empty? ? nil : attrs.join(',')
+    def self.build_json_get_account(account_email, authToken, mail_host_attribute)
       request = { }
       request[:Header] = { context: { } }
       request[:Header][:context][:_jsns] = "urn:zimbra"
@@ -22,7 +21,7 @@ module ZimbraInterceptingProxy
         _content: authToken
       }
       request[:Body] = { GetAccountRequest: { } }
-      request[:Body][:GetAccountRequest][:attrs] = attrs if attrs
+      request[:Body][:GetAccountRequest][:attrs] = mail_host_attribute
       request[:Body][:GetAccountRequest][:account] = {
         by: 'name',  '_content': account_email
       }
@@ -31,11 +30,14 @@ module ZimbraInterceptingProxy
       request.to_json
     end
 
-    def self.get_zimbra_account(account: nil, auth_token: nil, attrs: [])
+    def self.get_zimbra_account(account: nil, auth_token: nil)
       raise "account missing for ZmLookup" if account.nil?
       raise "auth_token missing for ZmLookup" if auth_token.nil?
-      json_request = self.build_json_get_account(account, auth_token, attrs)
+      mail_host_attribute = ZimbraInterceptingProxy::Config.mail_host_attribute
+
+      json_request = self.build_json_get_account(account, auth_token, mail_host_attribute)
       soap_admin_url = ZimbraInterceptingProxy::Config.soap_admin_url
+
 
       begin
         response = RestClient.post(soap_admin_url, json_request)
@@ -44,10 +46,8 @@ module ZimbraInterceptingProxy
         account = {
           "name" => data["name"],
           "id" => data["id"],
-          "zimbraMailTransport" => data["a"].first["_content"],
-          "zimbraMailHost" => data["a"].first["_content"].split(/:/)[1]
+          "#{mail_host_attribute}" => data["a"].first["_content"],
         }
-        pp account
       rescue RestClient::ExceptionWithResponse => e
         response = e.response
         ZimbraInterceptingProxy::Debug.logger e.response.body
