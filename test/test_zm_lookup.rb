@@ -124,10 +124,6 @@ class ZmLookup < Minitest::Test
     assert_equal(account_mailhost, response[ZimbraInterceptingProxy::Config.mail_host_attribute])
   end
 
-  def test_should_return_mailbox_name_from_transport
-
-  end
-
   # def test_only_set_zimbraId_when_passed_a_zimbraId
   #   u = ZimbraInterceptingProxy::User.new(@user[:zimbraId])
   #   assert_equal(u.zimbraId, @user[:zimbraId])
