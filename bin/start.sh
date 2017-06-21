@@ -8,5 +8,5 @@ ruby -I /usr/src/app/lib /usr/src/app/bin/zimbra_intercepting_proxy \
 --nameservers $NAMESERVERS \
 --url $ZIMBRA_SOAP \
 --default-mailbox-ip $DEFAULT_MAILBOX_IP \
---mailboxes-webmail-port $MAILBOXES_WEBMAIL_PORT \
+--mailboxes-mapping $MAILBOXES_MAPPING \
 -P $ZIMBRA_PASSWORD

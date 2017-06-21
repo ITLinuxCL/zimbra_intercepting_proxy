@@ -41,8 +41,8 @@ optparse = OptionParser.new do |opts|
     options[:default_mailbox_ip] = o
   end
 
-  opts.on("--mailboxes-webmail-port=", "Mapping of type 'IP_MBX1:PORT;IP_MBX2:PORT'") do |o|
-    options[:mailboxes_webmail_port] = o
+  opts.on("--mailboxes-mapping=", "Mapping of type 'IP_MBX:WEB_PORT:ZIMBRA_PATH;IP_MBX:WEB_PORT:ZIMBRA_PATH'") do |o|
+    options[:mailboxes_mapping] = o
   end
 
   opts.on("--old-mailbox-mail-url-path=", "Old Platform Mailbox Web Port to present Login Page") do |o|

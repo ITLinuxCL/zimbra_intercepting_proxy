@@ -46,11 +46,10 @@ module ZimbraInterceptingProxy
     ZimbraInterceptingProxy::Config.bind_port = options[:bind_port]
     ZimbraInterceptingProxy::Config.debug = options[:debug]
     ZimbraInterceptingProxy::Config.default_mailbox_ip = options[:default_mailbox_ip]
-    ZimbraInterceptingProxy::Config.mailboxes_webmail_port = options[:mailboxes_webmail_port]
+    ZimbraInterceptingProxy::Config.mailboxes_mapping = options[:mailboxes_mapping]
     ZimbraInterceptingProxy::Config.domain = options[:domain]
     ZimbraInterceptingProxy::Config.mail_host_attribute = options[:mail_host_attribute]
     ZimbraInterceptingProxy::Config.name_servers = options[:name_servers]
-    ZimbraInterceptingProxy::Config.old_mailbox_mail_url_path = options[:old_mailbox_mail_url_path]
     ZimbraInterceptingProxy::Config.soap_admin_url = options[:soap_admin_url]
     ZimbraInterceptingProxy::Config.zimbra_admin_authtoken = options[:zimbra_admin_authtoken]
   end

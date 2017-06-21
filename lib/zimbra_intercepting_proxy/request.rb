@@ -3,6 +3,7 @@ module ZimbraInterceptingProxy
     require 'pp'
 
     attr_accessor :body, :headers, :parser
+    attr_reader :zimbra_url_path
 
     def initialize(connection, parser = nil)
       @body = connection.body
@@ -24,7 +25,16 @@ module ZimbraInterceptingProxy
 
     # This is the post Auth request sent by Webmail, ActiveSync and POP and IMAP
     def default_auth_request?
-      @parser.http_method == "POST"  && @headers["Cookie"] = "ZM_TEST=true" && auth_request_params?
+      @parser.http_method == "POST"  && @headers["Cookie"] =~ /ZM_TEST=true/ && auth_request_params?
+    end
+
+    def set_host_header!(mailbox_hostname, mailbox_port)
+      @headers['Host'] = "#{mailbox_hostname}:#{mailbox_port}"
+    end
+
+    def set_zimbra_url_path!(path = '')
+      @zimbra_url_path = "#{path}#{@parser.request_url}"
+      @parser.request_url = @zimbra_url_path
     end
 
     def zco_auth_request?

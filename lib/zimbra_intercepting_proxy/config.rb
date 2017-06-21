@@ -1,6 +1,5 @@
 module ZimbraInterceptingProxy
   module Config
-    attr_accessor :new_backend, :old_backend
 
     ROUTE_URL = "/service/extension/nginx-lookup"
     ROUTE_REQUEST_PORT = 7072
@@ -30,11 +29,16 @@ module ZimbraInterceptingProxy
       @default_mailbox_ip = mailbox_ip
     end
 
-    def self.mailboxes_webmail_port=(mailboxes_port = '')
-      @mailboxes_webmail_port = {}
-      mailboxes_port.split(';').each do |mbx_port|
-        mailbox_ip, mailbox_port = mbx_port.split(':')
-        @mailboxes_webmail_port[mailbox_ip] = mailbox_port
+    def self.mailboxes_mapping=(mailboxes_maps = '')
+      @mailboxes_mapping = {}
+      mailboxes_maps.split(';').each do |mbx_map|
+        mbx_ip, mbx_port, mbx_zimbra_url_path = mbx_map.split(':')
+        zimbra_url_path = mbx_zimbra_url_path || ''
+        @mailboxes_mapping[mbx_ip] = {
+          port: mbx_port,
+          ip: mbx_ip,
+          zimbra_url_path: zimbra_url_path
+        }
       end
 
     end
@@ -53,10 +57,6 @@ module ZimbraInterceptingProxy
 
     def self.name_servers=(name_servers = [])
       @name_servers = name_servers
-    end
-
-    def self.old_mailbox_mail_url_path=(url_path)
-      @old_mailbox_mail_url_path = url_path || '/'
     end
 
     def self.soap_admin_url=(url)
@@ -99,12 +99,12 @@ module ZimbraInterceptingProxy
       @mail_host_attribute
     end
 
-    def self.name_servers
-      @name_servers || []
+    def self.mailboxes_mapping
+      @mailboxes_mapping
     end
 
-    def self.old_mailbox_mail_url_path
-      @old_mailbox_mail_url_path
+    def self.name_servers
+      @name_servers || []
     end
 
     def self.soap_admin_url
