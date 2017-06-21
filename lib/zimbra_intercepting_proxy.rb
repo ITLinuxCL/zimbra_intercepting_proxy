@@ -22,18 +22,37 @@ module ZimbraInterceptingProxy
 
   def self.start(options)
     config!(options)
+    set_token!
+
     ZimbraInterceptingProxy::Server.run
   end
 
+  def self.set_token!
+    unless ZimbraInterceptingProxy::Config.zimbra_admin_authtoken
+      username = ZimbraInterceptingProxy::Config.admin_user
+      password = ZimbraInterceptingProxy::Config.admin_password
+
+      token = ZimbraInterceptingProxy::ZmLookup.login(username: username, password: password)
+      raise "ZimbraInterceptingProxy::LoginError - Check log" unless token
+    end
+  end
+
   def self.config!(options)
-    ZimbraInterceptingProxy::Config.domain = options[:domain]
-    ZimbraInterceptingProxy::Config.migrated_users_file = options[:migrated_users_file]
-    ZimbraInterceptingProxy::Config.old_backend = options[:old_backend]
-    ZimbraInterceptingProxy::Config.new_backend = options[:new_backend]
-    ZimbraInterceptingProxy::Config.bind_address = options[:bind_address] || "0.0.0.0"
+    ZimbraInterceptingProxy::Config.admin_user = options[:admin_user]
+    ZimbraInterceptingProxy::Config.admin_password = options[:admin_password]
+    ZimbraInterceptingProxy::Config.bind_address = options[:bind_address]
+    ZimbraInterceptingProxy::Config.bind_port = options[:bind_port]
+    ZimbraInterceptingProxy::Config.bind_address = options[:bind_address]
     ZimbraInterceptingProxy::Config.bind_port = options[:bind_port]
     ZimbraInterceptingProxy::Config.debug = options[:debug]
-    ZimbraInterceptingProxy::Config.new_mbx_local_ip_regex = options[:new_mbx_local_ip_regex]
+    ZimbraInterceptingProxy::Config.default_mailbox_ip = options[:default_mailbox_ip]
+    ZimbraInterceptingProxy::Config.mailboxes_webmail_port = options[:mailboxes_webmail_port]
+    ZimbraInterceptingProxy::Config.domain = options[:domain]
+    ZimbraInterceptingProxy::Config.mail_host_attribute = options[:mail_host_attribute]
+    ZimbraInterceptingProxy::Config.name_servers = options[:name_servers]
+    ZimbraInterceptingProxy::Config.old_mailbox_mail_url_path = options[:old_mailbox_mail_url_path]
+    ZimbraInterceptingProxy::Config.soap_admin_url = options[:soap_admin_url]
+    ZimbraInterceptingProxy::Config.zimbra_admin_authtoken = options[:zimbra_admin_authtoken]
   end
 
 end

@@ -13,7 +13,8 @@ module ZimbraInterceptingProxy
       request.to_json
     end
 
-    def self.build_json_get_account(account_email, authToken, mail_host_attribute)
+    def self.build_json_get_account(account, authToken, mail_host_attribute)
+      by = account !~ /@/ ? 'id' : 'name'
       request = { }
       request[:Header] = { context: { } }
       request[:Header][:context][:_jsns] = "urn:zimbra"
@@ -23,57 +24,72 @@ module ZimbraInterceptingProxy
       request[:Body] = { GetAccountRequest: { } }
       request[:Body][:GetAccountRequest][:attrs] = mail_host_attribute
       request[:Body][:GetAccountRequest][:account] = {
-        by: 'name',  '_content': account_email
+        by: by,  '_content': account
       }
 
       request[:Body][:GetAccountRequest][:_jsns] = 'urn:zimbraAdmin'
       request.to_json
     end
 
-    def self.get_zimbra_account(account: nil, auth_token: nil)
+    def self.find_zimbra_account(account: nil, auth_token: nil)
       raise "account missing for ZmLookup" if account.nil?
       raise "auth_token missing for ZmLookup" if auth_token.nil?
       mail_host_attribute = ZimbraInterceptingProxy::Config.mail_host_attribute
-
       json_request = self.build_json_get_account(account, auth_token, mail_host_attribute)
-      soap_admin_url = ZimbraInterceptingProxy::Config.soap_admin_url
-
+      response = self.post_request(json_request)
+      account_data = nil
 
       begin
-        response = RestClient.post(soap_admin_url, json_request)
-        response_as_data = JSON.parse(response.body)
-        data = response_as_data["Body"]["GetAccountResponse"]["account"].first
-        account = {
-          "name" => data["name"],
-          "id" => data["id"],
-          "#{mail_host_attribute}" => data["a"].first["_content"],
+        if response["Body"]["Fault"]
+          Debug.logger "ZmLookup.find_zimbra_account: Account Not Found #{response["Body"]["Fault"]}"
+          return account_data
+        end
+        data = response["Body"]["GetAccountResponse"]["account"].first
+        account_data = {
+          email: data["name"],
+          zimbra_id: data["id"],
+          mail_host: data["a"].first["_content"],
         }
-      rescue RestClient::ExceptionWithResponse => e
-        response = e.response
-        ZimbraInterceptingProxy::Debug.logger e.response.body
-        account = nil
+      rescue Exception => e
+        ZimbraInterceptingProxy::Debug.logger "ZmLookup.find_zimbra_account: #{e.message}"
       end
 
-      return account
+      return account_data
     end
 
     def self.login(username: nil, password: nil)
       raise "username missing for ZmLookup" if username.nil?
       raise "password missing for ZmLookup" if password.nil?
+      auth_token = false
       json_request = self.build_json_auth(username, password)
-      soap_admin_url = ZimbraInterceptingProxy::Config.soap_admin_url
+      response = self.post_request(json_request)
+
       begin
-        response = RestClient.post(soap_admin_url, json_request)
+        if response["Body"]["Fault"]
+          Debug.logger response["Body"]["Fault"]
+        end
+        auth_token = response['Body']['AuthResponse']['authToken'].first['_content']
+
+      rescue Exception => e
+        ZimbraInterceptingProxy::Debug.logger e.message
+      end
+
+      ZimbraInterceptingProxy::Config::zimbra_admin_authtoken = auth_token
+      return auth_token
+    end
+
+    def self.post_request(json_request)
+      soap_admin_url = ZimbraInterceptingProxy::Config.soap_admin_url
+      resource = RestClient::Resource.new(soap_admin_url, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+      begin
+        response = resource.post json_request
         response_as_data = JSON.parse(response.body)
-        authToken = response_as_data['Body']['AuthResponse']['authToken'].first['_content']
+        return response_as_data
       rescue RestClient::ExceptionWithResponse => e
         response = e.response
         ZimbraInterceptingProxy::Debug.logger e.response.body
-        authToken = nil
+        return JSON.parse(e.response.body)
       end
-
-      ZimbraInterceptingProxy::Config::zimbra_admin_authtoken = authToken
-      return authToken
     end
 
     def self.soap_admin_url

@@ -1,75 +1,125 @@
-# require 'test_helper'
-#
-# class User < Minitest::Test
-#
-#   def setup
-#     @user = {
-#       email: "watson@example.com",
-#       zimbra_id: "251b1902-2250-4477-bdd1-8a101f7e7e4e",
-#       mail_host: "zimbra8.zboxapp.dev"
-#     }
-#   end
-#
-#   def test_only_set_zimbraId_when_passed_a_zimbraId
-#     u = ZimbraInterceptingProxy::User.new(@user[:zimbraId])
-#     assert_equal(u.zimbraId, @user[:zimbraId])
-#     assert_nil(u.email)
-#   end
-#
-#   def test_only_set_email_when_passed_an_email
-#     u = ZimbraInterceptingProxy::User.new(@user[:email])
-#     assert_equal(u.email, @user[:email])
-#     assert_nil(u.zimbraId)
-#   end
-#
-#   def test_return_email_when_passed_just_an_username
-#     u = ZimbraInterceptingProxy::User.new("watson")
-#     assert_equal(u.email, @user[:email])
-#     assert_nil(u.zimbraId)
-#   end
-#
-#   def test_should_load_db_user_file_to_global_hash
-#     assert_equal(ZimbraInterceptingProxy::User.DB.class, Hash)
-#   end
-#
-#   def test_db_should_have_emails_when_email_is_passed
-#     assert(ZimbraInterceptingProxy::User.DB["watson@example.com"])
-#   end
-#
-#   def test_return_true_if_migrated_user_with_zimbraId
-#     u = ZimbraInterceptingProxy::User.new("7b562ce0-be97-0132-9a66-482a1423458f")
-#     assert(u.migrated?, "Failure message.")
-#   end
-#
-#   def test_return_false_if_not_migrated_user_with_zimbraId
-#     u = ZimbraInterceptingProxy::User.new("7b562ce0-be97-0132-9a66-482a14234333")
-#     assert(!u.migrated?, "Failure message.")
-#   end
-#
-#   def test_return_true_if_migrated_user_with_email
-#     u = ZimbraInterceptingProxy::User.new(@user[:email])
-#     assert(u.migrated?, "Failure message.")
-#   end
-#
-#   def test_return_false_if_no_migrated_user_with_email
-#     u = ZimbraInterceptingProxy::User.new("pbruna")
-#     assert(!u.migrated?, "Failure message.")
-#   end
-#
-#   def test_migrated_false_if_email_nil
-#     u = ZimbraInterceptingProxy::User.new(nil)
-#     assert(!u.migrated?, "Failure message.")
-#   end
-#
-#
-#   def test_return_old_db_if_yamler_db_is_false
-#     backup_map_file # backup users.yml
-#     yaml_1 = ZimbraInterceptingProxy::User.DB.inspect
-#     add_error_line
-#     yaml_2 = ZimbraInterceptingProxy::User.DB.inspect
-#     restore_map_file
-#     assert_equal(Digest::MD5.digest(yaml_1), Digest::MD5.digest(yaml_2))
-#   end
-#
-#
-# end
+require 'test_helper'
+
+class TestUser < Minitest::Test
+
+  def setup
+    @user = {
+      email: "watson@example.com",
+      zimbra_id: "251b1902-2250-4477-bdd1-8a101f7e7e4e",
+      mail_host: "zimbra8.zboxapp.dev"
+    }
+    ZimbraInterceptingProxy::Config.zimbra_admin_authtoken = "11111"
+  end
+
+  def before_each
+    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailHost'
+  end
+
+  def after_each
+    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailHost'
+  end
+
+  def test_find_should_work_with_email
+    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailTransport'
+    account_email = "user@example.com"
+    account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
+    account_mailhost = "lmtp:server-05.zboxapp.dev:7025"
+    fixture_response = "
+    {
+      \"Header\":{
+        \"context\":{
+          \"_jsns\":\"urn:zimbra\"
+        }
+      },
+      \"Body\":{
+        \"GetAccountResponse\":{
+          \"account\":[
+            {
+              \"name\":\"#{account_email}\",
+              \"id\":\"#{account_id}\",
+              \"a\":[
+                {
+                  \"n\":\"zimbraMailTransport\",
+                  \"_content\":\"#{account_mailhost}\"
+                }
+              ]
+            }
+          ],
+          \"_jsns\":\"urn:zimbraAdmin\"
+        }
+      },
+      \"_jsns\":\"urn:zimbraSoap\"
+    }
+    "
+    stub_request(:post, /service\/admin\/soap$/).
+      with(body: /GetAccountRequest/).
+      to_return(body: fixture_response)
+
+    user = ZimbraInterceptingProxy::User.find(account_email)
+    assert_equal(account_id, user.zimbra_id)
+    assert_equal(account_mailhost.split(':')[1], user.mail_host)
+  end
+
+  def test_find_should_work_with_id
+    account_email = "admin@zboxapp.dev"
+    account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
+    account_mailhost = "server-05.zboxapp.dev"
+    fixture_response = "
+    {
+      \"Header\":{
+        \"context\":{
+          \"_jsns\":\"urn:zimbra\"
+        }
+      },
+      \"Body\":{
+        \"GetAccountResponse\":{
+          \"account\":[
+            {
+              \"name\":\"#{account_email}\",
+              \"id\":\"#{account_id}\",
+              \"a\":[
+                {
+                  \"n\":\"zimbraMailHost\",
+                  \"_content\":\"#{account_mailhost}\"
+                }
+              ]
+            }
+          ],
+          \"_jsns\":\"urn:zimbraAdmin\"
+        }
+      },
+      \"_jsns\":\"urn:zimbraSoap\"
+    }
+    "
+    stub_request(:post, /service\/admin\/soap$/).
+      with(body: /GetAccountRequest/).
+      to_return(body: fixture_response)
+
+    user = ZimbraInterceptingProxy::User.find(account_id)
+    assert_equal(account_email, user.email)
+    assert_equal(account_mailhost, user.mail_host)
+  end
+
+  def test_find_should_throw_user_not_found
+    fixture_response = "
+    {
+      \"Header\":{
+        \"context\":{
+          \"_jsns\":\"urn:zimbra\"
+        }
+      },
+      \"Body\":{
+        \"Fault\":{}
+      },
+      \"_jsns\":\"urn:zimbraSoap\"
+    }
+    "
+    stub_request(:post, /service\/admin\/soap$/).
+      with(body: /GetAccountRequest/).
+      to_return(body: fixture_response)
+
+    r = ZimbraInterceptingProxy::ZmLookup.find_zimbra_account(account: 'chupa@zboxapp.dev', auth_token: "auth_token")
+    assert_nil(r)
+  end
+
+end

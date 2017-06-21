@@ -9,7 +9,8 @@ Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new # spec-like progr
 
 ZimbraInterceptingProxy::Config.soap_admin_url = 'https://localhost:8071/service/admin/soap'
 ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailHost'
-ZimbraInterceptingProxy::Config.domain = "example.com"
+ZimbraInterceptingProxy::Config.domain = "zboxapp.dev"
+ZimbraInterceptingProxy::Config.name_servers = ['192.168.80.81']
 ZimbraInterceptingProxy::Config.migrated_users_file="./test/fixtures/users.yml"
 ZimbraInterceptingProxy::Config.old_backend = "old-mailbox.example.com"
 ZimbraInterceptingProxy::Config.new_backend = "new-mailbox.zboxapp.com"

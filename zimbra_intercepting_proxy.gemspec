@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'addressable', "~> 2.3"
   spec.add_dependency 'xml-simple', "~> 1.1"
   spec.add_dependency 'rest-client'
+  spec.add_dependency 'ipaddress'
 
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake"

@@ -1,0 +1,6 @@
+.git
+.gitignore
+test
+tmp
+vagrant
+.vagrant

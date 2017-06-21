@@ -43,11 +43,11 @@ class ZmLookup < Minitest::Test
       with(body: /AuthRequest/).
       to_return(body: fixture_response)
 
-    ZimbraInterceptingProxy::ZmLookup.login(username: "user@example.com", password: "password")
-    assert_equal(@auth_token, ZimbraInterceptingProxy::Config.zimbra_admin_authtoken)
+    auth_token = ZimbraInterceptingProxy::ZmLookup.login(username: "admin@zboxapp.dev", password: "12345678")
+    assert_equal(auth_token, ZimbraInterceptingProxy::Config.zimbra_admin_authtoken)
   end
 
-  def test_should_return_formated_json_get_account_request
+  def test_should_return_formated_json_get_account_request_with_name
     mail_host_attribute = ZimbraInterceptingProxy::Config.mail_host_attribute
     account_email = "user@example.com"
     expected_json = "
@@ -79,9 +79,41 @@ class ZmLookup < Minitest::Test
     assert_equal(JSON.parse(expected_json), JSON.parse(json_account))
   end
 
+  def test_should_return_formated_json_get_account_request_with_id
+    mail_host_attribute = ZimbraInterceptingProxy::Config.mail_host_attribute
+    account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
+    expected_json = "
+     {
+       \"Header\": {
+         \"context\": {
+           \"_jsns\": \"urn:zimbra\",
+           \"authToken\": {
+             \"_content\": \"#{@auth_token}\"
+           }
+         }
+       },
+       \"Body\": {
+         \"GetAccountRequest\": {
+           \"attrs\": \"#{mail_host_attribute}\",
+           \"account\":{
+             \"by\": \"id\",
+             \"_content\": \"#{account_id}\"
+           },
+           \"_jsns\": \"urn:zimbraAdmin\"
+         }
+       }
+     }
+    "
+
+    json_account = ZimbraInterceptingProxy::ZmLookup.build_json_get_account(
+      account_id, @auth_token, mail_host_attribute
+    )
+    assert_equal(JSON.parse(expected_json), JSON.parse(json_account))
+  end
+
   def test_should_return_account_info
     ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailTransport'
-    account_email = "user@example.com"
+    account_email = "admin@zboxapp.dev"
     account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
     account_mailhost = "lmtp:server-05.zboxapp.dev:7025"
     fixture_response = "
@@ -115,13 +147,12 @@ class ZmLookup < Minitest::Test
     stub_request(:post, /service\/admin\/soap$/).
       with(body: /GetAccountRequest/).
       to_return(body: fixture_response)
+    request_data = { account: account_email, auth_token: "auth_token"}
 
-    request_data = { account: "user@example.com", auth_token: "token"}
-
-    response = ZimbraInterceptingProxy::ZmLookup.get_zimbra_account(request_data)
-    assert_equal(account_email, response["name"])
-    assert_equal(account_id, response["id"])
-    assert_equal(account_mailhost, response[ZimbraInterceptingProxy::Config.mail_host_attribute])
+    response = ZimbraInterceptingProxy::ZmLookup.find_zimbra_account(request_data)
+    assert_equal(account_email, response[:email])
+    assert_equal(account_id, response[:zimbra_id])
+    assert_equal(account_mailhost, response[:mail_host])
   end
 
   # def test_only_set_zimbraId_when_passed_a_zimbraId
