@@ -3,6 +3,14 @@ module ZimbraInterceptingProxy
     require 'pp'
 
     attr_accessor :body, :headers, :parser
+    PROTO_PORTS = {
+      "http" => :port,
+      "https" => :port,
+      "pop3" => :pop3_port,
+      "pop3s" => :pop3_port,
+      "imap" => :imap_port,
+      "imaps" => :imap_port
+    }
 
     def initialize(connection, parser = nil)
       @body = connection.body
@@ -46,6 +54,33 @@ module ZimbraInterceptingProxy
       }
     end
 
+    def build_response(user, headers)
+      data = []
+      data << "HTTP/1.1 200"
+      data << "Date: #{Time.now.to_s}"
+      if user
+        host_ip = user.backend[:host]
+        proto = PROTO_PORTS[headers['Auth-Protocol']]
+        port_number = ZimbraInterceptingProxy::Config.mailboxes_mapping[host_ip][proto]
+        data << "Auth-Status: OK"
+        data << "Auth-Server: #{host_ip}"
+        data << "Auth-Port: #{port_number}"
+        data << "Auth-Cache-Alias: FALSE"
+        data << "Auth-User: #{headers['Auth-User']}"
+      else
+        data << "Auth-Status: user not found:#{headers['Auth-User']}"
+        data << "Auth-Wait: 10"
+      end
+      data << "Content-Length: 0"
+      data << ""
+      data << ""
+      data.join("\r\n")
+    end
+
+    def route_request?
+      @parser.request_url == ZimbraInterceptingProxy::Config::ROUTE_URL
+    end
+
     def has_user_data?
       auth_request? || route_request? || logged_user_request?
     end
@@ -54,20 +89,16 @@ module ZimbraInterceptingProxy
       request = extract_request_from_buffer(connection.buffer)
       return if request[:path].nil?
       request[:path] = request[:path].to_s.gsub(/^(\/zimbra)/, '')
-
-      # ZimbraInterceptingProxy::Debug.logger [:set_zimbra_path, path.to_s]
-      # request[:path] = "#{path.to_s}#{request[:path].to_s}"
-
       buffer_array = connection.buffer.to_s.split(/\r\n/)
       buffer_array[0] = [request[:method], request[:path], request[:http_version]].join(' ')
-      ZimbraInterceptingProxy::Debug.logger [:original_buffer, connection.buffer]
       connection.buffer = buffer_array.join("\r\n")
-      ZimbraInterceptingProxy::Debug.logger [:new_buffer, connection.buffer]
       return connection.buffer
     end
 
     def zco_auth_request?
-      @parser.http_method == "POST" && @parser.request_url == "/service/soap/AuthRequest" && @headers["User-Agent"].match(/Zimbra-ZCO/)
+      auth_method = 'POST'
+      auth_url = '/service/soap/AuthRequest'
+      @parser.http_method == auth_method && @parser.request_url == auth_url && @headers["User-Agent"].match(/Zimbra-ZCO/)
     end
 
 
@@ -84,15 +115,6 @@ module ZimbraInterceptingProxy
         cookies[name] = value
       end
       return cookies
-    end
-
-    def route_request?
-      @parser.request_url == ZimbraInterceptingProxy::Config::ROUTE_URL
-    end
-
-    def port
-      return ZimbraInterceptingProxy::Config::ROUTE_REQUEST_PORT if route_request?
-      return ZimbraInterceptingProxy::Config::AUTH_REQUEST_PORT if auth_request?
     end
 
     def user_token

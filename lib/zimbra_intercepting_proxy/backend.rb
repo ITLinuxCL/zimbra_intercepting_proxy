@@ -33,7 +33,7 @@ module ZimbraInterceptingProxy
       name_servers = ZimbraInterceptingProxy::Config.name_servers
       name_servers = name_servers.kind_of?(Array) ? name_servers : name_servers.to_s.split(',')
 
-      ZimbraInterceptingProxy::Debug.logger "DNS:: Using nameservers: #{name_servers.join(', ')}"
+      ZimbraInterceptingProxy::Debug.logger [:dns, "using nameservers: #{name_servers.join(', ')}"]
 
       domain = ZimbraInterceptingProxy::Config.domain
 

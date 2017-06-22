@@ -32,10 +32,12 @@ module ZimbraInterceptingProxy
     def self.mailboxes_mapping=(mailboxes_maps = '')
       @mailboxes_mapping = {}
       mailboxes_maps.split(';').each do |mbx_map|
-        mbx_ip, mbx_port, mbx_zimbra_url_path = mbx_map.split(':')
+        mbx_ip, mbx_port, pop3_port, imap_port, mbx_zimbra_url_path = mbx_map.split(':')
         zimbra_url_path = mbx_zimbra_url_path || ''
         @mailboxes_mapping[mbx_ip] = {
           port: mbx_port,
+          imap_port: imap_port || '143',
+          pop3_port: pop3_port || '110',
           ip: mbx_ip,
           zimbra_url_path: zimbra_url_path
         }

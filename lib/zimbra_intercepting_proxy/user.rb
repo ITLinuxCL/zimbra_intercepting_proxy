@@ -23,11 +23,6 @@ module ZimbraInterceptingProxy
       end
     end
 
-    # If user has email (unless email.nil?)
-    def migrated?
-      !find_in_db.nil?
-    end
-
     def backend
       mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
       mailbox_hostname = mail_host
@@ -39,46 +34,6 @@ module ZimbraInterceptingProxy
         path: mailbox_mapping[:zimbra_url_path]
       }
     end
-
-    def find_in_db
-      return User.DB[email] if has_email?
-      return User.DB.invert[zimbraId] if has_zimbraId?
-    end
-
-    def has_email?
-      !email.nil?
-    end
-
-    def has_zimbraId?
-      !zimbraId.nil?
-    end
-
-    # Return the old DB if the YAML file has error
-    def self.load_migrated_users
-      data = ZimbraInterceptingProxy::Yamler.db
-      return @@db unless data
-      @@db = data
-    end
-
-    def self.DB
-      load_migrated_users
-      @@db
-    end
-
-    private
-    def set_zimbraId user_identifier
-      return user_identifier if UUID.validate user_identifier
-      nil
-    end
-
-    def set_email user_identifier
-      return nil if user_identifier.nil?
-      return user_identifier if user_identifier.match(/@/)
-      return "#{user_identifier}@#{ZimbraInterceptingProxy::Config.domain}" unless UUID.validate user_identifier
-      nil
-    end
-
-
   end
 
 end

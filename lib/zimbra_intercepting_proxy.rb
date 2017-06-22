@@ -5,7 +5,6 @@ require 'http/parser'
 require "addressable/uri"
 require 'logger'
 require 'xmlsimple'
-require 'erb'
 require 'json'
 require "zimbra_intercepting_proxy/version"
 require "zimbra_intercepting_proxy/user"
@@ -15,7 +14,6 @@ require "zimbra_intercepting_proxy/request"
 require "zimbra_intercepting_proxy/server"
 require "zimbra_intercepting_proxy/debug"
 require "zimbra_intercepting_proxy/connection"
-require "zimbra_intercepting_proxy/yamler"
 require "zimbra_intercepting_proxy/zm_lookup"
 
 module ZimbraInterceptingProxy
