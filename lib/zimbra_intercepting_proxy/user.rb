@@ -29,8 +29,15 @@ module ZimbraInterceptingProxy
     end
 
     def backend
-      return ZimbraInterceptingProxy::Config.new_backend if migrated?
-      ZimbraInterceptingProxy::Config.old_backend
+      mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
+      mailbox_hostname = mail_host
+      mailbox_mapping = ZimbraInterceptingProxy::Config.mailboxes_mapping[mailbox_ip]
+      {
+        host: mailbox_ip,
+        host_name: mailbox_hostname,
+        port: mailbox_mapping[:port],
+        path: mailbox_mapping[:zimbra_url_path]
+      }
     end
 
     def find_in_db

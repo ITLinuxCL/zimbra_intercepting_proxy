@@ -3,7 +3,6 @@ module ZimbraInterceptingProxy
     require 'pp'
 
     attr_accessor :body, :headers, :parser
-    attr_reader :zimbra_url_path
 
     def initialize(connection, parser = nil)
       @body = connection.body
@@ -15,8 +14,12 @@ module ZimbraInterceptingProxy
       @parser = parser
     end
 
+    def logout_request?
+      @parser.http_method == "GET" && @parser.request_url =~ /\?loginOp=logout/
+    end
+
     def auth_request?
-      default_auth_request? || zco_auth_request?
+      web_auth_request? || zco_auth_request?
     end
 
     def logged_user_request?
@@ -24,7 +27,7 @@ module ZimbraInterceptingProxy
     end
 
     # This is the post Auth request sent by Webmail, ActiveSync and POP and IMAP
-    def default_auth_request?
+    def web_auth_request?
       @parser.http_method == "POST"  && @headers["Cookie"] =~ /ZM_TEST=true/ && auth_request_params?
     end
 
@@ -32,9 +35,35 @@ module ZimbraInterceptingProxy
       @headers['Host'] = "#{mailbox_hostname}:#{mailbox_port}"
     end
 
-    def set_zimbra_url_path!(path = '')
-      @zimbra_url_path = "#{path}#{@parser.request_url}"
-      @parser.request_url = @zimbra_url_path
+    def extract_request_from_buffer(buffer = '')
+      buffer_as_array = buffer.to_s.split(/\r\n/)
+      method, request_path, http_version = buffer_as_array.first.split(/\s+/)
+      request_path = request_path.to_s =~ /^\// ? request_path : nil
+      return {
+        method: method,
+        path: request_path,
+        http_version: http_version
+      }
+    end
+
+    def has_user_data?
+      auth_request? || route_request? || logged_user_request?
+    end
+
+    def fix_path!(connection, path = '')
+      request = extract_request_from_buffer(connection.buffer)
+      return if request[:path].nil?
+      request[:path] = request[:path].to_s.gsub(/^(\/zimbra)/, '')
+
+      # ZimbraInterceptingProxy::Debug.logger [:set_zimbra_path, path.to_s]
+      # request[:path] = "#{path.to_s}#{request[:path].to_s}"
+
+      buffer_array = connection.buffer.to_s.split(/\r\n/)
+      buffer_array[0] = [request[:method], request[:path], request[:http_version]].join(' ')
+      ZimbraInterceptingProxy::Debug.logger [:original_buffer, connection.buffer]
+      connection.buffer = buffer_array.join("\r\n")
+      ZimbraInterceptingProxy::Debug.logger [:new_buffer, connection.buffer]
+      return connection.buffer
     end
 
     def zco_auth_request?
@@ -67,7 +96,7 @@ module ZimbraInterceptingProxy
     end
 
     def user_token
-      return auth_username if default_auth_request?
+      return auth_username if web_auth_request?
       return auth_zimbraId if route_request?
       return auth_zco_username if zco_auth_request?
       return auth_zm_auth_tokken if logged_user_request?
