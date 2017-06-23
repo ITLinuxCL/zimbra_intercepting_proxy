@@ -39,8 +39,9 @@ module ZimbraInterceptingProxy
         lookup = self.dns_client.getaddress(mail_host)
         backend_ip = lookup.to_s
         ZimbraInterceptingProxy::Debug.logger [:dns, "Found IP #{backend_ip} for #{user.mail_host}"]
-      rescue Resolv::ResolvError => e
-        ZimbraInterceptingProxy::Debug.logger e.message
+      rescue Resolv::ResolvError => _e
+        ZimbraInterceptingProxy::Debug.logger [:DNS_ERROR, "NO IP for #{mail_host}"]
+        backend_ip default[:host]
       end
       @@hosts[mail_host] = { ipaddress: backend_ip, ttl: time_now }
       backend_ip

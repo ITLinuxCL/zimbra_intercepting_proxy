@@ -23,16 +23,23 @@ module ZimbraInterceptingProxy
       end
     end
 
-    def backend
-      mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
-      mailbox_hostname = mail_host
-      mailbox_mapping = ZimbraInterceptingProxy::Config.mailboxes_mapping[mailbox_ip]
-      {
-        host: mailbox_ip,
-        host_name: mailbox_hostname,
-        port: mailbox_mapping[:port],
-        path: mailbox_mapping[:zimbra_url_path]
-      }
+    def backend(default_backend)
+      backend = default_backend
+      begin
+        mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
+        mailbox_hostname = mail_host
+        mailbox_mapping = ZimbraInterceptingProxy::Config.mailboxes_mapping[mailbox_ip]
+        backend = {
+          host: mailbox_ip,
+          host_name: mailbox_hostname,
+          port: mailbox_mapping[:port],
+          path: mailbox_mapping[:zimbra_url_path]
+        }
+      rescue ExceptionName
+
+      end
+
+      return backend
     end
   end
 
