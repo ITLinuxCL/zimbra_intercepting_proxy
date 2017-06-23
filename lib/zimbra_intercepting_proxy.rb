@@ -48,6 +48,7 @@ module ZimbraInterceptingProxy
     ZimbraInterceptingProxy::Config.domain = options[:domain]
     ZimbraInterceptingProxy::Config.mail_host_attribute = options[:mail_host_attribute]
     ZimbraInterceptingProxy::Config.name_servers = options[:name_servers]
+    ZimbraInterceptingProxy::Config.prefix_path = options[:prefix_path]
     ZimbraInterceptingProxy::Config.soap_admin_url = options[:soap_admin_url]
     ZimbraInterceptingProxy::Config.zimbra_admin_authtoken = options[:zimbra_admin_authtoken]
   end

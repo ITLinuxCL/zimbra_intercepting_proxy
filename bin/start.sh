@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 echo "nameserver $NAMESERVERS" > /etc/resolv.conf
 
 
@@ -9,4 +9,5 @@ ruby -I /usr/src/app/lib /usr/src/app/bin/zimbra_intercepting_proxy \
 --url $ZIMBRA_SOAP \
 --default-mailbox-ip $DEFAULT_MAILBOX_IP \
 --mailboxes-mapping $MAILBOXES_MAPPING \
+--prefix-path $PREFIX_PATH \
 -P $ZIMBRA_PASSWORD

@@ -29,17 +29,21 @@ module ZimbraInterceptingProxy
       @default_mailbox_ip = mailbox_ip
     end
 
+    def self.prefix_path=(prefix_path)
+      @prefix_path = prefix_path
+    end
+
     def self.mailboxes_mapping=(mailboxes_maps = '')
       @mailboxes_mapping = {}
       mailboxes_maps.split(';').each do |mbx_map|
-        mbx_ip, mbx_port, pop3_port, imap_port, mbx_zimbra_url_path = mbx_map.split(':')
-        zimbra_url_path = mbx_zimbra_url_path || ''
+        mbx_ip, mbx_port, pop3_port, imap_port, remove_prexif = mbx_map.split(':')
+        remove_prexif = remove_prexif.nil? ? false : true
         @mailboxes_mapping[mbx_ip] = {
           port: mbx_port,
           imap_port: imap_port || '143',
           pop3_port: pop3_port || '110',
           ip: mbx_ip,
-          zimbra_url_path: zimbra_url_path
+          remove_prexif: remove_prexif
         }
       end
 
@@ -107,6 +111,10 @@ module ZimbraInterceptingProxy
 
     def self.name_servers
       @name_servers || []
+    end
+
+    def self.prefix_path
+      @prefix_path
     end
 
     def self.soap_admin_url

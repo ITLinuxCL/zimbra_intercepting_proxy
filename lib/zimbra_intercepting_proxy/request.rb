@@ -23,11 +23,11 @@ module ZimbraInterceptingProxy
     end
 
     def logout_request?
-      @parser.http_method == "GET" && @parser.request_url =~ /\?loginOp=logout/
+      @parser.request_url =~ /loginOp=logout/
     end
 
     def auth_request?
-      web_auth_request? || zco_auth_request?
+      (web_auth_request? && !logout_request?) || soap_auth_request?
     end
 
     def logged_user_request?
@@ -52,6 +52,16 @@ module ZimbraInterceptingProxy
         path: request_path,
         http_version: http_version
       }
+    end
+
+    def logout_redirect
+      data = []
+      data << "HTTP/1.0 302 Found"
+      data << "Date: #{Time.now.to_s}"
+      data << "Location: http://#{@headers['Host']}/"
+      data << "Content-Length: 0"
+      data << "\r\n"
+      return data.join("\r\n")
     end
 
     def build_response(user, headers)
@@ -85,20 +95,20 @@ module ZimbraInterceptingProxy
       auth_request? || route_request? || logged_user_request?
     end
 
-    def fix_path!(connection, path = '')
-      request = extract_request_from_buffer(connection.buffer)
-      return if request[:path].nil?
-      request[:path] = request[:path].to_s.gsub(/^(\/zimbra)/, '')
-      buffer_array = connection.buffer.to_s.split(/\r\n/)
-      buffer_array[0] = [request[:method], request[:path], request[:http_version]].join(' ')
-      connection.buffer = buffer_array.join("\r\n")
-      return connection.buffer
+    def remove_prexif(connection)
+      buffer_as_array = connection.buffer.to_s.split(/\r\n/)
+      request_data = buffer_as_array[0].split(/\s+/)
+      request_data[1] = @parser.request_url.gsub('/zimbra/', '/')
+      buffer_as_array[0] = request_data.join(' ')
+      buffer = buffer_as_array.join("\r\n") + "\r\n" + "\r\n"
+      ZimbraInterceptingProxy::Debug.logger [:remove_prexif, buffer]
+      return buffer
     end
 
-    def zco_auth_request?
+    def soap_auth_request?
       auth_method = 'POST'
       auth_url = '/service/soap/AuthRequest'
-      @parser.http_method == auth_method && @parser.request_url == auth_url && @headers["User-Agent"].match(/Zimbra-ZCO/)
+      @parser.http_method == auth_method && @parser.request_url == auth_url
     end
 
 
@@ -120,7 +130,7 @@ module ZimbraInterceptingProxy
     def user_token
       return auth_username if web_auth_request?
       return auth_zimbraId if route_request?
-      return auth_zco_username if zco_auth_request?
+      return auth_soap_username if soap_auth_request?
       return auth_zm_auth_tokken if logged_user_request?
     end
 
@@ -128,7 +138,7 @@ module ZimbraInterceptingProxy
       headers["Auth-User"]
     end
 
-    def auth_zco_username
+    def auth_soap_username
       # Hold on, we have to dig deeper
       xml = XmlSimple.xml_in @body
       xml["Body"].first["AuthRequest"].first["account"].first["content"]

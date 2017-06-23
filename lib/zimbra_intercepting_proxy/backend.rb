@@ -6,6 +6,23 @@ module ZimbraInterceptingProxy
     HOSTS_TTL_SECS = 3600
     @@hosts = {}
 
+    def self.default(previous_backend)
+      host_ip, host_port = previous_backend.to_s.split(':')
+      zip_config = ZimbraInterceptingProxy::Config
+      default_backend_ip = host_ip || zip_config.default_mailbox_ip
+      default_backend_hostname = host_ip || zip_config.default_mailbox_ip
+      default_backend_port = host_port || zip_config.mailboxes_mapping[default_backend_ip][:port]
+      default_backend_path = zip_config.mailboxes_mapping[default_backend_ip][:zimbra_url_path]
+
+      return {
+        host: default_backend_ip,
+        host_name: default_backend_hostname,
+        port: default_backend_port,
+        path: default_backend_path,
+        logout: false
+      }
+    end
+
     def self.for_user(user)
       backend_ip = self.find_ipaddress(user)
       return backend_ip
