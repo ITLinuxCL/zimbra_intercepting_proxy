@@ -1,4 +1,4 @@
-module ZimbraInterceptingProxy
+module ZmProxy
 
   class User
     attr_accessor :email, :zimbra_id, :mail_host
@@ -6,8 +6,8 @@ module ZimbraInterceptingProxy
     @@db = {}
 
     def self.find(account)
-      auth_token = ZimbraInterceptingProxy::Config.zimbra_admin_authtoken
-      account = ZimbraInterceptingProxy::ZmLookup.find_zimbra_account(account: account, auth_token: auth_token)
+      auth_token = ZmProxy::Config.zimbra_admin_authtoken
+      account = ZmProxy::ZmLookup.find_zimbra_account(account: account, auth_token: auth_token)
       return account if account.nil?
       self.new account
     end
@@ -24,9 +24,9 @@ module ZimbraInterceptingProxy
     end
 
     def backend
-      mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
+      mailbox_ip = ZmProxy::Backend.for_user(self)
       mailbox_hostname = mail_host
-      mailbox_mapping = ZimbraInterceptingProxy::Config.mailboxes_mapping[mailbox_ip]
+      mailbox_mapping = ZmProxy::Config.mailboxes_mapping[mailbox_ip]
       {
         host: mailbox_ip,
         host_name: mailbox_hostname,

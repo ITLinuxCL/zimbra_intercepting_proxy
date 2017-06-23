@@ -50,7 +50,7 @@ It's recommended to install it on the same Zimbra Proxy server. All you need to 
 
 ```bash
 $ gem install bundler
-$ gem install zimbra_intercepting_proxy
+$ gem install zm_proxy
 ```
 
 ### Zimbra Mailbox IP Whitelist
@@ -112,13 +112,13 @@ You have to start 2 instances of `ZIP`:
 So the first one:
 
 ```bash
-$ zimbra_intercepting_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9080 --newmailboxlocalip=192.168.0.
+$ zm_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9080 --newmailboxlocalip=192.168.0.
 ```
 
 And the second one:
 
 ```bash
-$ zimbra_intercepting_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9072 --newmailboxlocalip=192.168.0.
+$ zm_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9072 --newmailboxlocalip=192.168.0.
 ```
 
 #### Options
@@ -183,7 +183,7 @@ Check the examples directory for config files.
 
 ## Contributing
 
-1. Fork it ( https://github.com/pbruna/zimbra_intercepting_proxy/fork )
+1. Fork it ( https://github.com/pbruna/zm_proxy/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

@@ -1,35 +1,42 @@
-module ZimbraInterceptingProxy
-
+module ZmProxy
   module Server
     require 'pp'
 
+    def http_parser_factory(connection)
+      http_parser = Http::Parser.new
+      http_parser.on_message_begin = proc { |e| connection.started = true }
+      http_parser.on_headers_complete = proc { |e| connection.headers = e }
+      http_parser.on_body = proc { |chunk| connection.body << chunk }
+      http_parser
+    end
+
     def run
-      @@ip_hash = {}
-      debug = ZimbraInterceptingProxy::Debug
-      host = ZimbraInterceptingProxy::Config.bind_address
-      port = ZimbraInterceptingProxy::Config.bind_port
-      debug.logger "Starting server on #{host}:#{port} - V. #{ZimbraInterceptingProxy::VERSION}"
+      ZmProxy.Log.info [:start, "listen #{host}:#{port} - V. #{ZmProxy::VERSION}"]
+      proxy_cfg = { host: ZmProxy.cfg.bind_address, port: ZmProxy.cfg.bind_port }
 
+      Proxy.start(proxy_cfg) do |conn|
+        @connection = ZmProxy::Connection.new(conn.peer)
+        http_parser = ZmProxy::Server.http_parser_factory(@connection)
 
-      Proxy.start(:host => host, :port => port) do |conn|
-        debug.logger "\n\n----------- #{conn.peer.inspect} --------------------\n"
-        @id = Time.now.to_f
-        @user = nil
-        @client_ip = conn.peer[0]
-        connection = ZimbraInterceptingProxy::Connection.new
+        conn.on_connect { |name| ZmProxy.Log.info [:on_connect, name] }
+        conn.on_response { |backend, resp| resp }
 
-        @parser = Http::Parser.new
-        @parser.on_message_begin = proc { |e| connection.started = true }
-        @parser.on_headers_complete = proc do |e|
-           connection.headers = e
-         end
-        @parser.on_body = proc { |chunk| connection.body << chunk }
+        conn.on_data do |data|
+          @connection.buffer << data
+          http_parser << data
+          :async
+        end
 
-        @parser.on_message_complete = proc do |e|
-          previous_backend = @@ip_hash[@client_ip]
+        http_parser.on_message_complete = proc do |e|
+          request = ZmProxy::Request.new(@connection, http_parser)
+          user = ZmProxy::User.new(request)
+          backend = ZmProxy::Backend.lookup(@connection, request, user)
+
+          backend.send!
+
           debug.logger [:previous_backend, previous_backend]
-          @backend = ZimbraInterceptingProxy::Backend.default(previous_backend)
-          request = ZimbraInterceptingProxy::Request.new(connection, @parser)
+          @backend = ZmProxy::Backend.default(previous_backend)
+          request = ZmProxy::Request.new(connection, @parser)
 
           if request.has_user_data?
             @user = User.find(request.user_token)
@@ -65,20 +72,7 @@ module ZimbraInterceptingProxy
           end
         end
 
-        conn.on_connect do |name|
-          debug.logger [:on_connect, name]
-        end
 
-        conn.on_data do |data|
-          connection.buffer << data
-          @parser << data
-          :async
-        end
-
-        conn.on_response do |backend, resp|
-          # debug.logger [:on_response, resp]
-          resp
-        end
       end
     end
     module_function :run

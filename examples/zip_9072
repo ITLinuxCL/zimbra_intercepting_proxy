@@ -9,7 +9,7 @@
 
 dir=""
 user=""
-cmd="/usr/local/rbenv/shims/zimbra_intercepting_proxy -d ind.cl -f /opt/zimbra_preauth_router/users.yml -o 10.0.1.54 --newmailbox=190.196.215.125 -b 9072 --newmailboxlocalip=192.168.0. "
+cmd="/usr/local/rbenv/shims/zm_proxy -d ind.cl -f /opt/zimbra_preauth_router/users.yml -o 10.0.1.54 --newmailbox=190.196.215.125 -b 9072 --newmailboxlocalip=192.168.0. "
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"

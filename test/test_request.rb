@@ -16,14 +16,14 @@ class Request < Minitest::Test
     @parser.request_url = "/zimbra/"
     @connection.headers = {"Cookie" => "ZM_TEST=true"}
     @connection.body = "loginOp=login&username=pbruna&password=5693537374&client=preferred"
-    request = ZimbraInterceptingProxy::Request.new @connection, @parser
+    request = ZmProxy::Request.new @connection, @parser
     assert_equal("pbruna", request.user_token)
   end
 
   def test_should_return_user_token_from_route_request
-    @parser.request_url = ZimbraInterceptingProxy::Config::ROUTE_URL
+    @parser.request_url = ZmProxy::Config::ROUTE_URL
     @connection.headers = {"Auth-User" => "251b1902-2250-4477-bdd1-8a101f7e7e4e"}
-    request = ZimbraInterceptingProxy::Request.new @connection, @parser
+    request = ZmProxy::Request.new @connection, @parser
     assert_equal("251b1902-2250-4477-bdd1-8a101f7e7e4e", request.user_token)
   end
 
@@ -32,7 +32,7 @@ class Request < Minitest::Test
     @parser.request_url = "/service/soap/AuthRequest"
     @connection.headers = {"User-Agent" => "Zimbra-ZCO"}
     @connection.body = @soap_auth_request
-    request = ZimbraInterceptingProxy::Request.new @connection, @parser
+    request = ZmProxy::Request.new @connection, @parser
     assert_equal("watson@example.com", request.user_token)
   end
 

@@ -8,19 +8,19 @@ class TestUser < Minitest::Test
       zimbra_id: "251b1902-2250-4477-bdd1-8a101f7e7e4e",
       mail_host: "zimbra8.zboxapp.dev"
     }
-    ZimbraInterceptingProxy::Config.zimbra_admin_authtoken = "11111"
+    ZmProxy::Config.zimbra_admin_authtoken = "11111"
   end
 
   def before_each
-    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailHost'
+    ZmProxy::Config.mail_host_attribute = 'zimbraMailHost'
   end
 
   def after_each
-    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailHost'
+    ZmProxy::Config.mail_host_attribute = 'zimbraMailHost'
   end
 
   def test_find_should_work_with_email
-    ZimbraInterceptingProxy::Config.mail_host_attribute = 'zimbraMailTransport'
+    ZmProxy::Config.mail_host_attribute = 'zimbraMailTransport'
     account_email = "user@example.com"
     account_id = "cfd6e914-4f00-440c-9a57-e1a9327128b9"
     account_mailhost = "lmtp:server-05.zboxapp.dev:7025"
@@ -55,7 +55,7 @@ class TestUser < Minitest::Test
       with(body: /GetAccountRequest/).
       to_return(body: fixture_response)
 
-    user = ZimbraInterceptingProxy::User.find(account_email)
+    user = ZmProxy::User.find(account_email)
     assert_equal(account_id, user.zimbra_id)
     assert_equal(account_mailhost.split(':')[1], user.mail_host)
   end
@@ -95,7 +95,7 @@ class TestUser < Minitest::Test
       with(body: /GetAccountRequest/).
       to_return(body: fixture_response)
 
-    user = ZimbraInterceptingProxy::User.find(account_id)
+    user = ZmProxy::User.find(account_id)
     assert_equal(account_email, user.email)
     assert_equal(account_mailhost, user.mail_host)
   end
@@ -118,7 +118,7 @@ class TestUser < Minitest::Test
       with(body: /GetAccountRequest/).
       to_return(body: fixture_response)
 
-    r = ZimbraInterceptingProxy::ZmLookup.find_zimbra_account(account: 'chupa@zboxapp.dev', auth_token: "auth_token")
+    r = ZmProxy::ZmLookup.find_zimbra_account(account: 'chupa@zboxapp.dev', auth_token: "auth_token")
     assert_nil(r)
   end
 

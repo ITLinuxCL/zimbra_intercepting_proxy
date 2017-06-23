@@ -13,16 +13,16 @@ class Backend < Minitest::Test
       email: "zimbra8@zboxapp.dev",
       mail_host: "zimbra8.zboxapp.dev"
     }
-    @zimbra6_user = ZimbraInterceptingProxy::User.new(zimbra6_user_data)
-    @zimbra8_user = ZimbraInterceptingProxy::User.new(zimbra8_user_data)
+    @zimbra6_user = ZmProxy::User.new(zimbra6_user_data)
+    @zimbra8_user = ZmProxy::User.new(zimbra8_user_data)
     @ip_zimbra8 = "192.168.80.81"
     @ip_zimbra6 = "192.168.80.61"
   end
 
   def test_should_return_correct_ip_for_backend
-    backend6 = ZimbraInterceptingProxy::Backend.for_user @zimbra6_user
+    backend6 = ZmProxy::Backend.for_user @zimbra6_user
     assert_equal(@ip_zimbra6, backend6)
-    backend8 = ZimbraInterceptingProxy::Backend.for_user @zimbra8_user
+    backend8 = ZmProxy::Backend.for_user @zimbra8_user
     assert_equal(@ip_zimbra8, backend8)
   end
 end

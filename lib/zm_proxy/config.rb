@@ -1,4 +1,4 @@
-module ZimbraInterceptingProxy
+module ZmProxy
   module Config
 
     ROUTE_URL = "/service/extension/nginx-lookup"
