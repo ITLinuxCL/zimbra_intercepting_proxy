@@ -15,10 +15,10 @@ spec/reports
 test/tmp
 test/fixtures/*.org
 test/version_tmp
-tmp
+tmp/
 *.bundle
 *.so
 *.o
 *.a
 mkmf.log
-.vagrant
+.vagrant/

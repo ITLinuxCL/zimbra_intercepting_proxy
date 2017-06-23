@@ -9,7 +9,7 @@ module ZimbraInterceptingProxy
       @started = false
       @done = false
       @buffer = ''
+      @url = ''
     end
-
   end
 end

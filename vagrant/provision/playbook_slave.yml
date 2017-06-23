@@ -1,0 +1,27 @@
+---
+- hosts: all
+  sudo: yes
+  vars:
+    bind_listen_ipv4:
+      - 'any'
+    bind_allow_query:
+      - '192.168.0.0/16'
+      - '127.0.0.0/8'
+    bind_recursion: 'yes'
+    bind_zone_name: 'zboxapp.dev'
+    bind_zone_master_server_ip: '192.168.50.21'
+    bind_zone_name_servers:
+      - 'zimbra-slave'
+    bind_zone_mail_servers:
+      - name: 'zimbra-slave'
+        preference: 10
+    bind_zone_hosts:
+      - name: 'zimbra-slave'
+        ip: '192.168.50.21'
+      - name: 'zimbra'
+        ip: '192.168.50.11'
+
+  roles:
+    - role: common
+    - role: bertvv.bind
+    - role: pbruna.zimbradev

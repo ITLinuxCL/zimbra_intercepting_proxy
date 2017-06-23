@@ -1,67 +1,46 @@
 module ZimbraInterceptingProxy
-  
+
   class User
-    attr_accessor :email, :zimbraId
-    
+    attr_accessor :email, :zimbra_id, :mail_host
+
     @@db = {}
-    
+
+    def self.find(account)
+      auth_token = ZimbraInterceptingProxy::Config.zimbra_admin_authtoken
+      account = ZimbraInterceptingProxy::ZmLookup.find_zimbra_account(account: account, auth_token: auth_token)
+      return account if account.nil?
+      self.new account
+    end
+
     # user_identifier can be an email address, zimbraId UUID or just the
     # local part of an email address, like user in user@example.com
-    def initialize(user_identifier)
-      @zimbraId = set_zimbraId user_identifier
-      @email = set_email user_identifier
-      User.load_migrated_users
-    end
-    
-    # If user has email (unless email.nil?)
-    def migrated?
-      !find_in_db.nil?
-    end
-    
-    def backend
-      return ZimbraInterceptingProxy::Config.new_backend if migrated?
-      ZimbraInterceptingProxy::Config.old_backend
-    end
-    
-    def find_in_db
-      return User.DB[email] if has_email?
-      return User.DB.invert[zimbraId] if has_zimbraId?
-    end
-    
-    def has_email?
-      !email.nil?
-    end
-    
-    def has_zimbraId?
-      !zimbraId.nil?
+    def initialize(zimbra_id: nil, email: nil, mail_host: nil)
+      @zimbra_id = zimbra_id
+      @email = email
+      @mail_host = mail_host
+      if mail_host =~ /:/
+        @mail_host = mail_host.split(':')[1]
+      end
     end
 
-    # Return the old DB if the YAML file has error
-    def self.load_migrated_users
-      data = ZimbraInterceptingProxy::Yamler.db
-      return @@db unless data
-      @@db = data
-    end
-    
-    def self.DB
-      load_migrated_users
-      @@db
-    end
-    
-    private
-    def set_zimbraId user_identifier
-      return user_identifier if UUID.validate user_identifier
-      nil
-    end
-    
-    def set_email user_identifier
-      return nil if user_identifier.nil?
-      return user_identifier if user_identifier.match(/@/)
-      return "#{user_identifier}@#{ZimbraInterceptingProxy::Config.domain}" unless UUID.validate user_identifier
-      nil
-    end
+    def backend(default_backend)
+      backend = default_backend
+      begin
+        mailbox_ip = ZimbraInterceptingProxy::Backend.for_user(self)
+        mailbox_hostname = mail_host
+        mailbox_mapping = ZimbraInterceptingProxy::Config.mailboxes_mapping[mailbox_ip]
+        backend = {
+          host: mailbox_ip,
+          host_name: mailbox_hostname,
+          port: mailbox_mapping[:port],
+          path: mailbox_mapping[:zimbra_url_path]
+        }
+      rescue ExceptionName
 
-    
+      end
+
+      return backend
+    end
   end
-  
+
 end
