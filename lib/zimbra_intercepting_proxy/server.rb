@@ -32,7 +32,11 @@ module ZimbraInterceptingProxy
 
           if request.has_user_data?
             @user = User.find(request.user_token)
-            @backend = @user.backend if @user
+            begin
+              @backend = @user.backend if @user
+            rescue Exception => _e
+              ZimbraInterceptingProxy::Debug.logger [:dns_error, "Using default backend"]
+            end
           end
 
           if request.web_auth_request?
@@ -65,7 +69,7 @@ module ZimbraInterceptingProxy
         end
 
         conn.on_connect do |name|
-          
+
         end
 
         conn.on_data do |data|

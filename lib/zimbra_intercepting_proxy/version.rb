@@ -1,3 +1,3 @@
 module ZimbraInterceptingProxy
-  VERSION = "0.6.11"
+  VERSION = "0.6.15"
 end
