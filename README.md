@@ -70,7 +70,7 @@ $ zmprov ca zmproxy@example.com Password \
 
 ```
 # Interactive Mode
-$ docker run --rm -p -ti 9090:9090 \
+$ docker run --rm -ti --dns=192.168.80.81 -p 9090:9090 \
   -e ZIMBRA_USER=zmproxy@example.com \
   -e ZIMBRA_PASSWORD=Password \
   -e NAMESERVERS=192.168.80.81 \
@@ -82,7 +82,7 @@ $ docker run --rm -p -ti 9090:9090 \
   itlinuxcl/zimbra_zip
 
 # Background just change this line
-$ docker run -d --name zimbra_zip -p 9090:9090 \
+$ docker run -d --name zimbra_zip --dns=192.168.80.81 -p 9090:9090 \
   ......
 ```
 

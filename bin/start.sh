@@ -1,7 +1,4 @@
 #!/bin/sh
-echo "nameserver $NAMESERVERS" > /etc/resolv.conf
-
-
 ruby -I /usr/src/app/lib /usr/src/app/bin/zimbra_intercepting_proxy \
 -z $ZIMBRA_USER \
 -v $VERBOSE \
