@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require 'zimbra_intercepting_proxy'
+require 'zm_proxy'
 require 'optparse'
 
 # host, port
@@ -11,7 +11,7 @@ options = {}
 
 optparse = OptionParser.new do |opts|
 
-  opts.banner = "Usage: zimbra_intercepting_proxy [options]"
+  opts.banner = "Usage: zm_proxy [options]"
 
   opts.on("-z", "--zimbra-admin-email=", "Email address for an admin account") do |o|
     options[:admin_user] = o
@@ -29,7 +29,7 @@ optparse = OptionParser.new do |opts|
     options[:bind_port] = o
   end
 
-  opts.on("-v", "--verbose", "Save logs information to /var/log/zimbra_intercepting_proxy.log") do |o|
+  opts.on("-v", "--verbose", "Save logs information to /var/log/zm_proxy.log") do |o|
     options[:debug] = true
   end
 
@@ -80,4 +80,4 @@ end
 
 optparse.parse!
 
-ZimbraInterceptingProxy.start options
+ZmProxy.start options
