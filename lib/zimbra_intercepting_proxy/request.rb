@@ -101,7 +101,6 @@ module ZimbraInterceptingProxy
       request_data[1] = @parser.request_url.gsub('/zimbra/', '/')
       buffer_as_array[0] = request_data.join(' ')
       buffer = buffer_as_array.join("\r\n") + "\r\n" + "\r\n"
-      ZimbraInterceptingProxy::Debug.logger [:remove_prexif, buffer]
       return buffer
     end
 

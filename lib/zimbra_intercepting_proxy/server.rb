@@ -12,7 +12,7 @@ module ZimbraInterceptingProxy
 
 
       Proxy.start(:host => host, :port => port) do |conn|
-        debug.logger "\n\n----------- #{conn.peer.inspect} --------------------\n"
+        debug.logger "\n\n-------------------------------\n"
         @id = Time.now.to_f
         @user = nil
         @client_ip = conn.peer[0]
@@ -27,7 +27,6 @@ module ZimbraInterceptingProxy
 
         @parser.on_message_complete = proc do |e|
           previous_backend = @@ip_hash[@client_ip]
-          debug.logger [:previous_backend, previous_backend]
           @backend = ZimbraInterceptingProxy::Backend.default(previous_backend)
           request = ZimbraInterceptingProxy::Request.new(connection, @parser)
 
@@ -66,7 +65,7 @@ module ZimbraInterceptingProxy
         end
 
         conn.on_connect do |name|
-          debug.logger [:on_connect, name]
+          
         end
 
         conn.on_data do |data|

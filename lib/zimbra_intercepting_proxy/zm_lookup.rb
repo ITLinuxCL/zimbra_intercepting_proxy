@@ -62,9 +62,9 @@ module ZimbraInterceptingProxy
       raise "password missing for ZmLookup" if password.nil?
       auth_token = false
       json_request = self.build_json_auth(username, password)
-      response = self.post_request(json_request)
 
       begin
+        response = self.post_request(json_request)
         if response["Body"]["Fault"]
           Debug.logger response["Body"]["Fault"]
         end
@@ -72,6 +72,7 @@ module ZimbraInterceptingProxy
 
       rescue Exception => e
         ZimbraInterceptingProxy::Debug.logger e.message
+        raise e
       end
 
       ZimbraInterceptingProxy::Config::zimbra_admin_authtoken = auth_token

@@ -1,5 +1,4 @@
 require "yaml"
-require "uuid"
 require 'em-proxy'
 require 'http/parser'
 require "addressable/uri"
@@ -30,8 +29,13 @@ module ZimbraInterceptingProxy
       username = ZimbraInterceptingProxy::Config.admin_user
       password = ZimbraInterceptingProxy::Config.admin_password
 
-      token = ZimbraInterceptingProxy::ZmLookup.login(username: username, password: password)
-      raise "ZimbraInterceptingProxy::LoginError - Check log" unless token
+      begin
+        token = ZimbraInterceptingProxy::ZmLookup.login(username: username, password: password)
+      rescue Errno::ECONNREFUSED => e
+        ZimbraInterceptingProxy::Debug.logger [:zimbra_admin, "SOAP URL not responding"]
+        ZimbraInterceptingProxy::Debug.logger [:zimbra_admin_stack, e.message]
+      end
+      raise "ZimbraInterceptingProxy::LoginError" unless token
     end
   end
 

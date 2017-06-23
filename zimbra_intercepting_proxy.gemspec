@@ -6,7 +6,7 @@ require 'zimbra_intercepting_proxy/version'
 Gem::Specification.new do |spec|
   spec.name          = "zimbra_intercepting_proxy"
   spec.version       = ZimbraInterceptingProxy::VERSION
-  spec.authors       = ["Patricio Bruna"]
+  spec.author       = ["Patricio Bruna"]
   spec.email         = ["pbruna@itlinux.cl"]
   spec.summary       = "A HTTP intercepting Proxy for the Zimbra Proxy"
   spec.description   = spec.summary
@@ -19,8 +19,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'em-proxy', "~> 0.1.8"
-  spec.add_dependency 'thor', "~> 0.19"
-  spec.add_dependency 'uuid', "~> 2.3"
   spec.add_dependency 'http_parser.rb', "~> 0.6"
   spec.add_dependency 'addressable', "~> 2.3"
   spec.add_dependency 'xml-simple', "~> 1.1"

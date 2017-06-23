@@ -1,7 +1,6 @@
-# Zimbra Intercepting Proxy
+# ZmProxy
 
-This software is used to intercept and apply modifications to the traffic between a Zimbra Proxy and Zimbra Mailboxes.
-If you don't know what a Zimbra Proxy is, You can read about it here: [https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide](https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide)
+This software is used to intercept and apply modifications to the traffic between a Zimbra Proxy and Zimbra Mailboxes. If you don't know what a Zimbra Proxy is, You can read about it here: [https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide](https://wiki.zimbra.com/wiki/Zimbra_Proxy_Guide)
 
 This work for all kind of client access:
 
@@ -28,153 +27,110 @@ Not a hot topic for Zimbra Inc., sorry guys, but lets be honest about it, some c
 
 The main problem with this is that you have to configure your clients with to kind of information.
 
-### How Zimbra Intercepting Proxy Works
-Zimbra Intercepting Proxy reads a map file, a `YAML` file, in which you indicate the pair `username:zimbraID` of the users located on the _other_  Mailbox.
+## Tutorial
+This tutorial is based on the following setup:
 
-Based on this information, `ZIP` tell the Zimbra Proxy to which Mailbox it should communicate with.
+* One Zimbra Mailbox v6, that we want to migrate to,
+* Multi Server Zimbra, with 1 Zimbra Proxy, and 2 Zimbra Mailboxes
 
-## Instalation and configuration
+Also, the new Zimbra Proxy should be running on CentOS 7.
 
-### Requirements
-This has been tested with:
-
-* Zimbra >= 7
-* Ruby >= 2.0
-* Bundler >= 1.9
-* Zimbra Proxy
-
-**You need to have direct access to the `7072` port of both Mailboxes**.
-
-### Installation
-It's recommended to install it on the same Zimbra Proxy server. All you need to do is run:
-
-```bash
-$ gem install bundler
-$ gem install zimbra_intercepting_proxy
-```
-
-### Zimbra Mailbox IP Whitelist
-
-Since version 8, Zimbra has a DDoS protection system that blocks IP's address with many failed login connections. It's adviced by the [Zimbra Docs](https://wiki.zimbra.com/wiki/DoSFilter) to Whitelist the IP's address that you trust.
-
-You have to do this on the `NEW_MAILBOX` to whitelist connections from the IP from where you are migrating
-
-```bash
-$ zmprov mcf +zimbraHttpThrottleSafeIPs NEW_MAILBOX_IP
-$ zmmailboxdctl restart
-```
-
-### Zimbra Proxy Modification
-
-**Important Note**
-You are going to modify Zimbra template files, used to build the configuration files of Nginx. **Take some backups!!**
-
-* All the files are located in `/opt/zimbra/conf/nginx/templates`.
-* `<`, config being replaced
-* `>`, new config
-
-You have to make this modifications
-
-```diff
- # nginx.conf.mail.template
-19c19,20
-<     ${mail.:auth_http}
----
->
->     auth_http  localhost:9072/service/extension/nginx-lookup;
-```
-
-```diff
- # nginx.conf.web.template
-17c17
-<         #${web.upstream.:servers}
----
->         server localhost:9080;
-23c23
-<     #${web.:routehandlers}
----
->     zmroutehandlers localhost:9072/service/extension/nginx-lookup;
-```
-
-Next restart. You should restart memcached and nginx, but just to be sure:
-
-```bash
-$ zmcontrol restart
-```
-
-### Starting Zimbra Intercepting Proxy
-
-You have to start 2 instances of `ZIP`:
-
-* One on port `9080` for Web and SOAP Auth Requests, and
-* One on port `9072` for `Route-Handler`, this is how the Proxy knows to which Mailbox redirect the traffic.
-
-So the first one:
-
-```bash
-$ zimbra_intercepting_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9080 --newmailboxlocalip=192.168.0.
-```
-
-And the second one:
-
-```bash
-$ zimbra_intercepting_proxy -d example.com -f /root/users.yml -o oldmailbox.example.com --newmailbox=190.196.215.125 -b 9072 --newmailboxlocalip=192.168.0.
-```
-
-#### Options
-
-* `-d`, the domain, in case the user only enters the username,
-* `-o`, the _default_ or old Mailbox,
-* `--newmailbox`, the _other_ or new Mailbox,
-* `-f`, the `YAML` map file, with the list of users on the `--newmailbox`,
-* `-b`, the bind port
-* `--newmailboxlocalip`, the LAN IP address of the `--newmailbox`
-
-
-#### The Map File
-
-It's a simple YAML file with a `email:zimbraId` pair, like
-
-```yaml
-max@example.com: "7b562c60-be97-0132-9a66-482a1423458f"
-moliery@example.com: "7b562ce0-be97-0132-9a66-482a1423458f"
-watson@example.com: "251b1902-2250-4477-bdd1-8a101f7e7e4e"
-sherlock@example.com: "7b562dd0-be97-0132-9a66-482a1423458f"
-```
-
-Updating the file does **not require** a restart.
-
-You can get the `zimbraId` with:
+### 1. Install Docker on the Zimbra Proxy Server
 
 ```
-$ zmprov ga watson@example.com zimbraId
+$ yum install epel-release -y
+$ yum install docker -y
+$ systemctl enable docker
+$ systemctl start docker
 ```
 
-##### Error in Map File
-If you have an error in your file, `ZIP` will return the on memory Map, this way we can keep the service up. In this event you should see this on `STDOUT`:
+### 2. Configure Zimbra Nginx Templates
+This config is going to use a running Docker listen on the `9090` port.
 
-```shel
-ERROR Yaml File: (./test/fixtures/users.yml): could not find expected ':' while scanning a simple key at line 7
+ ```
+ # Backup directory
+ $ cp -a /opt/zimbra/conf/nginx/templates /opt/zimbra/conf/nginx/templates.backup
+ $ curl -k https://raw.githubusercontent.com/ITLinuxCL/zimbra_intercepting_proxy/master/examples/nginx.conf.mail.template > /opt/zimbra/conf/nginx/templates/nginx.conf.mail.template
+ $ curl -k https://raw.githubusercontent.com/ITLinuxCL/zimbra_intercepting_proxy/master/examples/nginx.conf.web.template > /opt/zimbra/conf/nginx/templates/nginx.conf.web.template
+ $ curl -k https://raw.githubusercontent.com/ITLinuxCL/zimbra_intercepting_proxy/master/examples/nginx.conf.zmlookup.template > /opt/zimbra/conf/nginx/templates/nginx.conf.zmlookup.template
+ $ chown zimbra.zimbra -R /opt/zimbra/conf/nginx/templates/
+ ```
+
+### 3. Create and Admin User
+We need an admin user to lookup the mailbox for the account, this admin needs to have a **non-expiring token**.
+
+```
+$ zmprov ca zmproxy@example.com Password \
+  zimbraIsAdminAccount TRUE \
+  zimbraAdminAuthTokenLifetime 100d \
+  zimbraAuthTokenLifetime 100d
 ```
 
-## Init scripts
+### 4. Start the Container
 
-In the `examples` directory you have the following files:
+```
+# Interactive Mode
+$ docker run --rm -p -ti 9090:9090 \
+  -e ZIMBRA_USER=zmproxy@example.com \
+  -e ZIMBRA_PASSWORD=Password \
+  -e NAMESERVERS=192.168.80.81 \
+  -e ZIMBRA_SOAP=https://any_new_mailbox:7071/service/admin/soap \
+  -e DEFAULT_MAILBOX_IP=192.168.80.81 \
+  -e MAILBOXES_MAPPING='192.168.80.81:8080:7110:7143:true;192.168.80.61:80:110:143' \
+  -e PREFIX_PATH=/zimbra \
+  -e VERBOSE=true \
+  itlinuxcl/zimbra_zip
 
-* `zip_9072`, to start the server on port 9072
-* `zip_9080`, you know
-
-Copy both files to the `/etc/init.d/` directory and then enable the services like this:
-
-```bash
-$ chkconfig --add zip_9072
-$ chkconfig --add zip_9080
+# Background just change this line
+$ docker run -d --name zimbra_zip -p 9090:9090 \
+  ......
 ```
 
-### Monit
-It may be posible that `ZIP` crash for some reason, it's a new software after all. To reduce the down time we recomend to use [Monit](http://mmonit.com/monit/) to monitor and restart the `ZIP` in case of trouble.
+You can check de running docker in background with:
 
-Check the examples directory for config files.
+```
+docker logs zimbra_zip -f
+```
+
+About the variables:
+
+* `ZIMBRA_USER`, is the admin user,
+* `ZIMBRA_PASSWORD`, password for the admin user,
+* `NAMESERVERS`, an IP address of a DNS server that can resolv all mailboxes, including old and new,
+* `ZIMBRA_SOAP`, url of a mailbox where to do the lookups,
+* `DEFAULT_MAILBOX_IP`, one of the mailboxes on the new platform
+* `PREFIX_PATH`, the Zimbra 6 use a prefix when sending requests,
+* `MAILBOXES_MAPPING`, this holds the information of the port used in every mailbox.
+
+The syntax of `MAILBOXES_MAPPING` is:
+
+```
+IP,WEB_P,POP_P,IMAP_P:REMOVE_PREFIX;IP,WEB_P,POP_P,IMAP_P:REMOVE_PREFIX;
+```
+
+Where:
+
+* `IP`, ip of a mailbox
+* `WEB_P,POP_P,IMAP_P`, ports where listen the webmail, pop3, and imap services
+* `REMOVE_PREFIX`, it ZmProxy shoud remove the `/zimbra` prefix for this mailbox
+
+You **must** list all the mailboxes here.
+
+### 5. Re-configure Zimbra Proxy and restart
+
+```
+$ /opt/zimbra/libexec/zmproxyconfgen
+$ /opt/zimbra/bin/zmproxyctl restart
+```
+
+### 6. Check status
+If you run the container in Interactive mode, you should see the logs on your screen, if not
+you can run the following command:
+
+```
+$ docker logs zimbra_zip -f
+```
+
 
 ## Thanks
 
