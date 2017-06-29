@@ -5,6 +5,8 @@ module ZimbraInterceptingProxy
     ROUTE_REQUEST_PORT = 7072
     AUTH_REQUEST_PORT = 80
 
+    @hosts = {}
+
     def self.admin_user=(admin_user)
       @admin_user = admin_user
     end
@@ -35,16 +37,19 @@ module ZimbraInterceptingProxy
 
     def self.mailboxes_mapping=(mailboxes_maps = '')
       @mailboxes_mapping = {}
+      puts mailboxes_maps
       mailboxes_maps.split(';').each do |mbx_map|
-        mbx_ip, mbx_port, pop3_port, imap_port, remove_prexif = mbx_map.split(':')
+        host_name, mbx_ip, mbx_port, pop3_port, imap_port, remove_prexif = mbx_map.split(':')
         remove_prexif = remove_prexif.nil? ? false : true
         @mailboxes_mapping[mbx_ip] = {
+          host_name: host_name,
           port: mbx_port,
           imap_port: imap_port || '143',
           pop3_port: pop3_port || '110',
           ip: mbx_ip,
           remove_prexif: remove_prexif
         }
+        @hosts[host_name] = mbx_ip
       end
 
     end
@@ -99,6 +104,10 @@ module ZimbraInterceptingProxy
 
     def self.debug
       @debug
+    end
+
+    def self.hosts
+      return @hosts
     end
 
     def self.mail_host_attribute

@@ -45,7 +45,7 @@ optparse = OptionParser.new do |opts|
     options[:prefix_path] = o
   end
 
-  opts.on("--mailboxes-mapping=", "Mapping of type 'IP_MBX:WEB_PORT:POP3_PORT:IMAP_PORT:REMOVE_PREFIX'") do |o|
+  opts.on("--mailboxes-mapping=", "Mapping of type 'ZM_HOST_NAME:IP_MBX:WEB_PORT:POP3_PORT:IMAP_PORT:REMOVE_PREFIX'") do |o|
     options[:mailboxes_mapping] = o
   end
 

@@ -76,7 +76,7 @@ $ docker run --rm -ti --dns=192.168.80.81 -p 9090:9090 \
   -e NAMESERVERS=192.168.80.81 \
   -e ZIMBRA_SOAP=https://any_new_mailbox:7071/service/admin/soap \
   -e DEFAULT_MAILBOX_IP=192.168.80.81 \
-  -e MAILBOXES_MAPPING='192.168.80.81:8080:7110:7143:true;192.168.80.61:80:110:143' \
+  -e MAILBOXES_MAPPING='zimbra8.zboxapp.dev:192.168.80.81:8080:7110:7143:true;zimbra6.zboxapp.dev:192.168.80.61:80:110:143' \
   -e PREFIX_PATH=/zimbra \
   -e VERBOSE=true \
   itlinuxcl/zimbra_zip
@@ -105,11 +105,12 @@ About the variables:
 The syntax of `MAILBOXES_MAPPING` is:
 
 ```
-IP,WEB_P,POP_P,IMAP_P:REMOVE_PREFIX;IP,WEB_P,POP_P,IMAP_P:REMOVE_PREFIX;
+ZM_HOST_NAME:IP:WEB_P:POP_P:IMAP_P:REMOVE_PREFIX;ZM_HOST_NAME:IP:WEB_P:POP_P:IMAP_P:REMOVE_PREFIX;
 ```
 
 Where:
 
+* `ZM_HOST_NAME`, is the server name as returned by `/opt/zimbra/bin/zmhostname`
 * `IP`, ip of a mailbox
 * `WEB_P,POP_P,IMAP_P`, ports where listen the webmail, pop3, and imap services
 * `REMOVE_PREFIX`, it ZmProxy shoud remove the `/zimbra` prefix for this mailbox
