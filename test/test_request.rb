@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class Request < Minitest::Test
-  
+
   def setup
     @done = false
     @auth_request = IO.read("./test/fixtures/auth_80.txt")
@@ -10,12 +10,12 @@ class Request < Minitest::Test
     @connection = OpenStruct.new
     @parser = OpenStruct.new
   end
-  
+
   def test_should_return_user_token_from_auth_request
     @parser.http_method = "POST"
     @parser.request_url = "/zimbra/"
     @connection.headers = {"Cookie" => "ZM_TEST=true"}
-    @connection.body = "loginOp=login&username=pbruna&password=5693537374&client=preferred"
+    @connection.body = "loginOp=login&username=pbruna&password=WRONG&client=preferred"
     request = ZimbraInterceptingProxy::Request.new @connection, @parser
     assert_equal("pbruna", request.user_token)
   end
