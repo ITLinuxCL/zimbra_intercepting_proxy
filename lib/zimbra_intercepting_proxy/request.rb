@@ -36,7 +36,12 @@ module ZimbraInterceptingProxy
 
     # This is the post Auth request sent by Webmail, ActiveSync and POP and IMAP
     def web_auth_request?
-      @parser.http_method == "POST"  && @headers["Cookie"] =~ /ZM_TEST=true/ && auth_request_params?
+      begin
+        @parser.http_method == "POST"  && @headers["Cookie"] !~ /ZM_AUTH_TOKEN/ && @parser.request_url =~ /^(\/zimbra\/|\/)$/  
+      rescue Exception => _
+        false
+      end
+      
     end
 
     def set_host_header!(mailbox_hostname, mailbox_port)
@@ -108,12 +113,6 @@ module ZimbraInterceptingProxy
       auth_method = 'POST'
       auth_url = '/service/soap/AuthRequest'
       @parser.http_method == auth_method && @parser.request_url == auth_url
-    end
-
-
-    def auth_request_params?
-      uri = Addressable::URI.parse("http://localhost/?#{@body}")
-      uri.query_values["loginOp"] == "login"
     end
 
     def cookies_to_hash(cookie_header)

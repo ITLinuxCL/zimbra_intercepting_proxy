@@ -35,7 +35,7 @@ module ZimbraInterceptingProxy
 
     def self.mailboxes_mapping=(mailboxes_maps = '')
       @mailboxes_mapping = {}
-      mailboxes_maps.split(';').each do |mbx_map|
+      mailboxes_maps.to_s.split(';').each do |mbx_map|
         mbx_ip, mbx_port, pop3_port, imap_port, remove_prexif = mbx_map.split(':')
         remove_prexif = remove_prexif.nil? ? false : true
         @mailboxes_mapping[mbx_ip] = {

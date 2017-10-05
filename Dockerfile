@@ -1,16 +1,16 @@
 FROM ruby:2.3.4-alpine
-RUN mkdir -p /usr/src/app
-COPY Gemfile.docker /usr/src/app/Gemfile
-COPY Gemfile.lock /usr/src/app/
-WORKDIR /usr/src/app
-
 RUN apk update \
     && \
     apk add musl libgcc libstdc++ binutils-libs binutils \
     isl libgomp libatomic pkgconf mpfr3 mpc1 gcc musl-dev \
-    libc-dev g++ musl-utils make \
-    && \
-    bundle config --global frozen 1 \
+    libc-dev g++ musl-utils make
+
+
+RUN mkdir -p /usr/src/app
+COPY Gemfile.docker /usr/src/app/Gemfile
+COPY Gemfile.lock /usr/src/app/Gemfile.lock
+WORKDIR /usr/src/app
+RUN bundle config --global frozen 1 \
     && \
     bundle install \
     && \
