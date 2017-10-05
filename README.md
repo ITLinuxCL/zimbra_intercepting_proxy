@@ -76,6 +76,7 @@ $ docker run --rm -ti --dns=192.168.80.81 -p 9090:9090 \
   -e NAMESERVERS=192.168.80.81 \
   -e ZIMBRA_SOAP=https://any_new_mailbox:7071/service/admin/soap \
   -e DEFAULT_MAILBOX_IP=192.168.80.81 \
+  -e DEFAULT_DOMAIN=example.com \
   -e MAILBOXES_MAPPING='192.168.80.81:8080:7110:7143:true;192.168.80.61:80:110:143' \
   -e PREFIX_PATH=/zimbra \
   -e VERBOSE=true \
@@ -99,6 +100,7 @@ About the variables:
 * `NAMESERVERS`, an IP address of a DNS server that can resolv all mailboxes, including old and new,
 * `ZIMBRA_SOAP`, url of a mailbox where to do the lookups,
 * `DEFAULT_MAILBOX_IP`, one of the mailboxes on the new platform
+* `DEFAULT_DOMAIN`, default domain to add when only the user part is sent
 * `PREFIX_PATH`, the Zimbra 6 use a prefix when sending requests,
 * `MAILBOXES_MAPPING`, this holds the information of the port used in every mailbox.
 

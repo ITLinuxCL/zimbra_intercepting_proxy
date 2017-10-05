@@ -49,7 +49,7 @@ module ZimbraInterceptingProxy
     ZimbraInterceptingProxy::Config.debug = options[:debug]
     ZimbraInterceptingProxy::Config.default_mailbox_ip = options[:default_mailbox_ip]
     ZimbraInterceptingProxy::Config.mailboxes_mapping = options[:mailboxes_mapping]
-    ZimbraInterceptingProxy::Config.domain = options[:domain]
+    ZimbraInterceptingProxy::Config.default_domain = options[:default_domain]
     ZimbraInterceptingProxy::Config.mail_host_attribute = options[:mail_host_attribute]
     ZimbraInterceptingProxy::Config.name_servers = options[:name_servers]
     ZimbraInterceptingProxy::Config.prefix_path = options[:prefix_path]

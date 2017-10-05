@@ -29,6 +29,10 @@ module ZimbraInterceptingProxy
       @default_mailbox_ip = mailbox_ip
     end
 
+    def self.default_domain=(domain)
+      @default_domain = domain
+    end
+
     def self.prefix_path=(prefix_path)
       @prefix_path = prefix_path
     end
@@ -83,6 +87,10 @@ module ZimbraInterceptingProxy
 
     def self.default_mailbox_ip
       @default_mailbox_ip
+    end
+
+    def self.default_domain
+      @default_domain
     end
 
     def self.domain

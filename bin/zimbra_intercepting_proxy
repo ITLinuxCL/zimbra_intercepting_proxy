@@ -34,7 +34,7 @@ optparse = OptionParser.new do |opts|
   end
 
   opts.on("-d", "--domain=", "Default domain for the account") do |o|
-    options[:domain] = o
+    options[:default_domain] = o || nil
   end
 
   opts.on("--default-mailbox-ip=", "Default Mailbox to present Login Page") do |o|
